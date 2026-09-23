@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="pa19" nsURI="http://www.example.org/pa19" nsPrefix="pa19">
+  <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+    <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+      <details key="requirement" value=" Overall/Domain description.&#xA; Console pipe-connection game: grid with outer walls, one source inside pointing inward, one sink on the border&#xA;  pointing outward. Player places pipes from a queue; after a delay, water flows along placed pipes.&#xA;  Player-facing coordinates are 1-based for gameplay input (e.g., row = 1.., col = 'A'..), while the internal Cell[][] indices are&#xA;  0-based with the playable area in [1..rows-2] × [1..cols-2] (outer border occupies indices 0 and rows-1/cols-1). Direction provides four directions plus opposite/offset; PipeShape defines&#xA;  connection&#xA;  directions; TerminationType distinguishes SOURCE vs SINK.&#xA;&#xA;  Functional Requirements&#xA;&#xA;  Coordinate and Direction: The system manages 2D grid coordinates through the Coordinate class as map array indices (row/col used to index Cell[][] directly).&#xA;  Although player input is 1-based (row starts at 1, col 'A' maps to 1), this aligns with the playable region indices [1..rows-2] × [1..cols-2] due to the outer wall border.&#xA;  Direction enum provides four directions (UP, DOWN, LEFT, RIGHT) and Pa19Helper provides getOpposite() returning the opposite direction&#xA;  and getOffset() returning the unit coordinate offset for movement calculations.&#xA;&#xA;  Game: Operations to place a pipe, skip, undo, advance water flow, check win, check loss; convenience fromString&#xA;  constructor; maintain step count. Operation placePipe: This method should convert the row and column into Coordinate&#xA;  (using row as-is, and col mapped by col - 'A' + 1) and try to place the pipe on the map. If this succeeds, also update the pipe queue, delay bar, cell stack, and the&#xA;  number of steps. Operation skipPipe: Consumes the current pipe from the queue and increments the step count. Operation&#xA;  undoStep: Pops the last placed cell from CellStack, restores the pipe to the queue head, clears the cell on the map,&#xA;  and increments the step count. Returns false if there are no steps to undo.&#xA;&#xA;  Map: Cells are stored as a 2D array Cell[][] with indices [0..rows-1] × [0..cols-1],&#xA;  where index 0 and rows-1/cols-1 are walls (border). The playable area occupies&#xA;  internal indices [1..rows-2] × [1..cols-2], which coincidentally aligns with 1-based&#xA;  user input mapping. tryPlacePipe(row, col, pipe) accepts playable-area aligned coordinates (row and col in [1..rows-2] × [1..cols-2]) and uses them&#xA;  directly as array indices (no conversion needed due to the wall alignment).&#xA;  It rejects: (1) row/col outside [1..rows-2] × [1..cols-2], (2) non-FillableCell,&#xA;  or (3) already-occupied cell.&#xA;&#xA;  Cell family: Cell.fromChar parses map chars to concrete cells; FillableCell holds an optional pipe and renders pipe or&#xA;  '.'; TerminationCell holds pointingTo direction and Type (SOURCE/SINK), with filled state for rendering; Wall renders&#xA;  wall char.&#xA;&#xA;  TerminationCell.toSingleChar: Returns the corresponding arrow character based on the current termination cell's&#xA;  filling state and pointingTo direction: when filled, returns the arrow from PipePatterns.Filled; when unfilled,&#xA;  returns the arrow from PipePatterns.Unfilled. Both SOURCE and SINK use pointingTo directly without direction reversal.&#xA;  Throws IllegalStateException(&quot;Invalid pointingTo value!&quot;) for unknown direction.&#xA;&#xA;  Pipe: Expose connection directions via getConnections() returning Direction[] based on Shape; char rendering by&#xA;  filled/unfilled state; construct from short string code (HZ, VT, TL, TR, BL, BR, CR). getConnections(): Returns the&#xA;  list of connection directions based on the current pipe shape; throws IllegalStateException(&quot;Unknown shape&quot;) if the&#xA;  shape is not recognized. toSingleChar(): Returns the character representation of this pipe, different for filled and&#xA;  unfilled pipes.&#xA;&#xA;  Water Flow: fillBeginTile() marks the source cell as filled. fillTiles(distance) fills pipes within the specified&#xA;  distance from source using BFS-style expansion. Water propagates along pipes only when adjacent pipes have matching&#xA;  connection directions (one pipe's direction must be the opposite of the other). Each round increments the fill&#xA;  distance by 1.&#xA;&#xA;  Win/Loss Conditions: checkPath() uses BFS to determine if a connected path exists from SOURCE to SINK by following&#xA;  (i) from SOURCE, step once in the SOURCE pointingTo direction, and (ii) from a pipe cell, step in each pipe connection direction.&#xA;  It does not require the traversed pipes to be filled; reaching the SINK cell implies win. hasLost() returns true when prevFilledTiles == 0,&#xA;  meaning no new pipes were filled in the previous round (loss condition). The game checks loss only after delay has ended (distance > 0).&#xA;&#xA;  PipeQueue: peek/consume/undo head pipe and auto-refill to fixed length with random shapes. undo(Pipe) inserts the pipe&#xA;  back to the front of the queue.&#xA;&#xA;  DelayBar: countdown() decrements the current value by 1 each round. distance() returns -currentValue, representing how&#xA;  far the water should flow (negative during countdown, positive after delay ends).&#xA;&#xA;  CellStack: push/pop last placement; undoCount counts the number of successful undo actions (i.e., successful pop&#xA;  operations), not the current stack size; &#xA;&#xA;  External/Tool Classes (not generated; handwritten or reused,You only need to assume that these Java files mentioned below are already in the pa19 package.)&#xA;  Pa19Helper is a small helper/assembly class used to build core game model objects for this project. It provides&#xA;  convenience methods to (1) construct a Game by wiring together Map, PipeQueue, DelayBar, and CellStack from given&#xA;  inputs, and (2) create/parse basic elements (e.g., Map from a Cell[][] or string representation, map characters/short&#xA;  codes into Cell/Pipe). It also centralizes simple direction utilities (opposite direction and unit offsets) used&#xA;  during parsing and movement-related calculations.&#xA;  Deserializer: Purpose: deserialize map input into runtime objects. Field: Path path (input file path). Constructors:&#xA;  Deserializer(String path) delegates to private Deserializer(Path); private Deserializer(Path) validates file existence&#xA;  and throws FileNotFoundException if missing. Methods: Game parseGame() reads rows, cols, delay, map lines, and&#xA;  optional default pipes, then returns Pa19Helper.createGame(...); on unexpected EOF or I/O failure, returns null&#xA;  (and logs error). static Cell[][] parseString(int rows, int cols, String cellsRep) converts multiline text to a Cell&#xA;  matrix by character, using Pa19Helper.cellFromChar with SINK type on border cells and SOURCE type on inner&#xA;  cells. private String getFirstNonEmptyLine(BufferedReader br) returns the first non-blank, non-comment line (ignores&#xA;  lines starting with #), or null at end of stream.&#xA;&#xA;  PipePatterns: Purpose: central constant repository for all map-rendering characters. Design: final utility class with&#xA;  private constructor (non-instantiable). Exposed constants: WALL (solid wall block), plus two nested static groups:&#xA;  Filled and Unfilled. Each group defines arrow chars (UP_ARROW, DOWN_ARROW, LEFT_ARROW, RIGHT_ARROW) and pipe-shape&#xA;  chars (HORIZONTAL, VERTICAL, TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT, CROSS). Use PipePatterns constants for&#xA;  all rendering chars; do not hardcode glyphs in TerminationCell and PipeShape logic.&#xA;&#xA;  StringUtils: Purpose: provide lightweight string helper utilities. Class design: utility class with a private&#xA;  constructor to prevent instantiation. "/>
+    </eAnnotations>
+    <details key="requirement" value="Overall / Domain Description&#xA;This is a console pipe-connection game. The game board is a grid surrounded by outer walls. Inside the board there is one source, and on the border there is one sink. The player places pipes from a pipe queue. After an initial delay, water begins to flow through connected pipes.&#xA;The board uses zero-based internal array indices. However, index 0 and the last row/column are occupied by the outer wall border. Therefore, the playable area starts from internal index 1 and ends at rows - 2 / cols - 2.&#xA;Player-facing coordinates intentionally align with these playable internal indices:&#xA;row 1 refers to internal row 1, and column 'A' refers to internal column 1. No row-minus-one or column-minus-one conversion is applied, except that column letters are mapped so that 'A' becomes 1.&#xA;Directions include up, down, left, and right. Each direction has a corresponding opposite direction and a unit movement offset(class PA19Helper will help class Direction to provide these functions). Pipe shapes define which directions they connect to. Termination type distinguishes source and sink.&#xA;&#xA;Functional Requirements&#xA;&#xA;Coordinate and Direction&#xA;A coordinate stores the internal row and column used directly to access the cell grid. A cell stored at a given grid position should carry the same coordinate value.&#xA;Because the outer border occupies index 0, playable cells naturally begin at index 1. This allows user input to align directly with the playable internal grid.&#xA;Directions support movement calculations through their unit offsets and can be compared against their opposite direction when checking pipe connectivity.&#xA;&#xA;Game&#xA;The game supports placing the current pipe, skipping the current pipe, undoing the latest placement, advancing the water state, checking whether the player has won, checking whether the player has lost, and tracking the number of player steps.&#xA;When the player places a pipe, the row value is used directly. The column letter is converted so that 'A' maps to column 1, 'B' maps to column 2, and so on. For example, row 1 and column 'A' target the internal cell at [1][1].&#xA;Skipping removes the current pipe from the front of the queue and counts as one step.&#xA;Undo restores the latest placed pipe to the front of the queue, clears that pipe from the board, and counts as one step. If there is no previous placement to undo, the operation fails without changing the board.&#xA;&#xA;Map&#xA;The map stores cells in a two-dimensional grid with indices from [0..rows-1] and [0..cols-1]. The outermost row and column positions are walls. The playable area is [1..rows-2] by [1..cols-2].&#xA;A pipe may be placed only when all of the following are true:&#xA;1. The target coordinate is inside the playable area.&#xA;2. The target cell is a fillable cell.&#xA;3. The target cell does not already contain a pipe.&#xA;&#xA;Cell Family&#xA;Cells are parsed from map characters into concrete cell types.&#xA;A fillable cell may contain a pipe or be empty. Empty fillable cells render as a dot.&#xA;A termination cell represents either the source or the sink. It stores the direction it points toward and whether it has been filled by water.&#xA;A wall cell represents the board boundary and renders using the wall character.&#xA;&#xA;Termination Cell Rendering&#xA;A termination cell renders as an arrow based on its direction and filled state. Filled and unfilled arrows come from the shared rendering constants.&#xA;Both source and sink use their stored pointing direction directly. The direction is not reversed for either type.&#xA;Throws IllegalStateException(&quot;Invalid pointingTo value!&quot;) for unknown direction.&#xA;&#xA;Pipe&#xA;A pipe has a shape and a filled state. Its shape determines the directions it connects to.&#xA;Supported pipe shapes include horizontal, vertical, the four corner shapes, and cross.&#xA;Pipe rendering depends on both shape and filled state. The rendered character should come from the shared rendering constants rather than hardcoded glyphs.&#xA;Short pipe codes include HZ, VT, TL, TR, BL, BR, and CR.&#xA;&#xA;Water Flow&#xA;At the beginning of water flow, the source is marked as filled.&#xA;Water expands outward from the source by distance. Each update increases the reachable fill distance by one.&#xA;Water may move from one pipe to an adjacent pipe only when both sides connect to each other: the outgoing direction of one pipe must match the opposite direction of the neighboring pipe.&#xA;The filling process follows breadth-first expansion from the source.&#xA;&#xA;Win and Loss Conditions&#xA;The player wins if there is a connected path from the source to the sink.&#xA;Path checking starts from the source by moving once in the source’s pointing direction. From each pipe, traversal continues through that pipe’s connection directions. The path does not require pipes to already be filled. Reaching the sink means the game is won.&#xA;The player loses when a water-flow update fills no new pipes. Loss is checked only after the initial delay has ended and water has actually started advancing.&#xA;&#xA;Pipe Queue&#xA;The pipe queue stores upcoming pipes. The player always interacts with the pipe at the front.&#xA;When a pipe is consumed, the queue is automatically refilled up to a fixed maximum length using randomly generated pipe shapes.&#xA;Undo places the restored pipe back at the front of the queue.&#xA;&#xA;Delay Bar&#xA;The delay bar starts with an initial value and decreases once per round.&#xA;While the value is still positive, water has not begun flowing. Once the countdown passes zero, the corresponding positive distance indicates how far water should expand from the source.&#xA;&#xA;Cell Stack&#xA;The placement history records successfully placed cells in order.&#xA;Undo uses the most recent placement. The undo counter represents the number of successful undo actions, not the current size of the placement history.&#xA;&#xA;External / Tool Classes&#xA;Pa19Helper is a handwritten helper and assembly class in the pa19 package. It is responsible for constructing core game objects from provided inputs, wiring together the map, pipe queue, delay bar, and placement history. It also centralizes basic parsing and direction utility behavior.&#xA;Deserializer is responsible for reading game input from a file and producing runtime game objects. It validates that the input file exists, reads the board size, delay value, map lines, and optional default pipes. If the input ends unexpectedly or an I/O error occurs, it returns no game object and logs the error.&#xA;When parsing map text, border cells are treated as sink-side termination candidates, while inner termination symbols are treated as source-side candidates.&#xA;Deserializer ignores blank lines and comment lines beginning with # when reading meaningful input.&#xA;PipePatterns is a final utility-style constant holder for all rendering characters. It contains the wall character and grouped constants for filled and unfilled arrows and pipe shapes. Rendering logic should rely on these constants instead of hardcoded characters.&#xA;StringUtils is a lightweight utility-style class for string helpers and should not be instantiated."/>
+  </eAnnotations>
+  <eClassifiers xsi:type="ecore:EClass" name="Game">
+    <eOperations name="placePipe" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean">
+      <eParameters name="row" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+      <eParameters name="col" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EChar"/>
+    </eOperations>
+    <eOperations name="skipPipe"/>
+    <eOperations name="undoStep" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eOperations name="updateState"/>
+    <eOperations name="hasWon" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eOperations name="hasLost" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numOfSteps" unique="false"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt" defaultValueLiteral="0"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="map" eType="#//Map" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="pipeQueue" eType="#//PipeQueue"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="delayBar" eType="#//DelayBar"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="cellStack" eType="#//CellStack"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Cell" abstract="true" eSuperTypes="#//MapElement">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="coord" eType="#//Coordinate"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FillableCell" eSuperTypes="#//Cell">
+    <eOperations name="toSingleChar" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EChar"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="pipe" eType="#//Pipe" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Wall" eSuperTypes="#//Cell">
+    <eOperations name="toSingleChar" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EChar">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="return PipePatterns.WALL;"/>
+      </eAnnotations>
+    </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="TerminationCell" eSuperTypes="#//Cell">
+    <eOperations name="toSingleChar" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EChar">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value=" if (filled) {&#xA;            switch (pointingTo) {&#xA;                case UP:&#xA;                    return PipePatterns.Filled.UP_ARROW;&#xA;                case DOWN:&#xA;                    return PipePatterns.Filled.DOWN_ARROW;&#xA;                case LEFT:&#xA;                    return PipePatterns.Filled.LEFT_ARROW;&#xA;                case RIGHT:&#xA;                    return PipePatterns.Filled.RIGHT_ARROW;&#xA;            }&#xA;        } else {&#xA;            switch (pointingTo) {&#xA;                case UP:&#xA;                    return PipePatterns.Unfilled.UP_ARROW;&#xA;                case DOWN:&#xA;                    return PipePatterns.Unfilled.DOWN_ARROW;&#xA;                case LEFT:&#xA;                    return PipePatterns.Unfilled.LEFT_ARROW;&#xA;                case RIGHT:&#xA;                    return PipePatterns.Unfilled.RIGHT_ARROW;&#xA;            }&#xA;        }&#xA;&#xA;        throw new IllegalStateException(&quot;Invalid pointingTo value!&quot;);"/>
+      </eAnnotations>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="filled" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
+        defaultValueLiteral="false"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="pointingTo" lowerBound="1"
+        eType="#//Direction"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" eType="#//TerminationType"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Pipe" eSuperTypes="#//MapElement">
+    <eOperations name="getConnections" upperBound="-1" eType="#//Direction"/>
+    <eOperations name="toSingleChar" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EChar">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="return getShape().getCharByState(isFilled());"/>
+      </eAnnotations>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="filled" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
+        defaultValueLiteral="false"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="shape" lowerBound="1" eType="#//PipeShape"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="PipeQueue">
+    <eOperations name="peek" eType="#//Pipe"/>
+    <eOperations name="consume"/>
+    <eOperations name="undo">
+      <eParameters name="pipe" eType="#//Pipe"/>
+    </eOperations>
+    <eOperations name="generateNewPipe" eType="#//Pipe"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="maxGenLength" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        changeable="false" defaultValueLiteral="5"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="pipeQueue" upperBound="-1"
+        eType="#//Pipe" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DelayBar">
+    <eOperations name="countdown"/>
+    <eOperations name="distance" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="initialValue" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        changeable="false"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="currentValue" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="CellStack">
+    <eOperations name="push">
+      <eParameters name="cell" eType="#//FillableCell"/>
+    </eOperations>
+    <eOperations name="pop" eType="#//FillableCell"/>
+    <eOperations name="getUndoCount" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="count" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        defaultValueLiteral="0"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="stack" upperBound="-1"
+        eType="#//FillableCell" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="Direction">
+    <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+      <details key="requirement" value="Enum Direction: Represents four grid-based directions.&#xA;Requirements for generated methods:&#xA;&#xA;Operation getOpposite():&#xA;&#xA;Logic: Return the logical inverse direction using a switch-case statement.&#xA;&#xA;Mapping: UP &lt;-> DOWN, LEFT &lt;-> RIGHT.&#xA;&#xA;Fallback: Throw IllegalStateException for unknown values.&#xA;&#xA;&#xA;Operation getOffset():&#xA;&#xA;Logic: Return a unit offset as a newly instantiated Coordinate object using the custom constructor Coordinate(int row, int col).&#xA;&#xA;Mapping: UP -> (-1, 0), DOWN -> (1, 0), LEFT -> (0, -1), RIGHT -> (0, 1).&#xA;&#xA;Fallback: Throw IllegalStateException for unknown values."/>
+    </eAnnotations>
+    <eLiterals name="UP"/>
+    <eLiterals name="DOWN" value="1"/>
+    <eLiterals name="LEFT" value="2"/>
+    <eLiterals name="RIGHT" value="3"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Coordinate">
+    <eOperations name="add" eType="#//Coordinate">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value=" Coordinate result = Pa19Factory.eINSTANCE.createCoordinate();&#xA;&#x9;  result.setRow(this.getRow() + other.getRow());&#xA;&#x9;  result.setCol(this.getCol() + other.getCol());&#xA;&#x9;  return result;"/>
+      </eAnnotations>
+      <eParameters name="other" eType="#//Coordinate"/>
+    </eOperations>
+    <eOperations name="equals" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="if (this == obj) return true;&#xA;    if (!(obj instanceof Coordinate)) return false;&#xA;    if(obj==null) return false;&#xA;    Coordinate other = (Coordinate)obj;&#xA;    return this.row == other.row &amp;&amp; this.col == other.col;"/>
+      </eAnnotations>
+      <eParameters name="obj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EJavaObject"/>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="row" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="col" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Map">
+    <eOperations name="tryPlacePipe1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean">
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="return tryPlacePipe(coord.row, coord.col, pipe);"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eParameters name="coord" eType="#//Coordinate"/>
+      <eParameters name="pipe" eType="#//Pipe"/>
+    </eOperations>
+    <eOperations name="tryPlacePipe" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean">
+      <eParameters name="row" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+      <eParameters name="col" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+      <eParameters name="pipe" eType="#//Pipe"/>
+    </eOperations>
+    <eOperations name="undo">
+      <eParameters name="coord" eType="#//Coordinate"/>
+    </eOperations>
+    <eOperations name="fillBeginTile">
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="if (this.getSourceCell() != null) {&#xA;            this.getSourceCell().setFilled(true);&#xA;        }&#xA;    "/>
+      </eAnnotations>
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+    </eOperations>
+    <eOperations name="fillTiles">
+      <eParameters name="distance" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    </eOperations>
+    <eOperations name="checkPath" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean">
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Uses BFS to check if a path exists from sourceCell to sinkCell"/>
+      </eAnnotations>
+    </eOperations>
+    <eOperations name="hasLost" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="rows" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="cols" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="prevFilledTiles" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        changeable="false" transient="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="prevFilledDistance" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EIntegerObject"
+        changeable="false" transient="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="sourceCell" lowerBound="1"
+        eType="#//TerminationCell"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="sinkCell" lowerBound="1"
+        eType="#//TerminationCell"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="filledTiles" upperBound="-1"
+        eType="#//Coordinate" transient="true" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="cell" eType="#//cellarray"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="PipeShape">
+    <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+      <details key="requirement" value="{&#xA;  &quot;Operations&quot;: [&#xA;    {&#xA;      &quot;name&quot;: &quot;getCharByState&quot;,&#xA;      &quot;returnType&quot;: &quot;char&quot;,&#xA;      &quot;parameters&quot;: [{&quot;name&quot;: &quot;isFilled&quot;, &quot;type&quot;: &quot;boolean&quot;}],&#xA;      &quot;logic&quot;: &quot;Return 'this.filledChar' if isFilled is true, otherwise return 'this.unfilledChar'.&quot;&#xA;    }&#xA;  ],&#xA;  &quot;PipeShapeMapping&quot;: {&#xA;    &quot;HORIZONTAL&quot;: {&#xA;      &quot;mapping_key&quot;: &quot;mapping_HZ&quot;,&#xA;      &quot;filled&quot;: &quot;PipePatterns.Filled.HORIZONTAL&quot;,&#xA;      &quot;unfilled&quot;: &quot;PipePatterns.Unfilled.HORIZONTAL&quot;&#xA;    },&#xA;    &quot;VERTICAL&quot;: {&#xA;      &quot;mapping_key&quot;: &quot;mapping_VT&quot;,&#xA;      &quot;filled&quot;: &quot;PipePatterns.Filled.VERTICAL&quot;,&#xA;      &quot;unfilled&quot;: &quot;PipePatterns.Unfilled.VERTICAL&quot;&#xA;    },&#xA;    &quot;TOP_LEFT&quot;: {&#xA;      &quot;mapping_key&quot;: &quot;mapping_TL&quot;,&#xA;      &quot;filled&quot;: &quot;PipePatterns.Filled.TOP_LEFT&quot;,&#xA;      &quot;unfilled&quot;: &quot;PipePatterns.Unfilled.TOP_LEFT&quot;&#xA;    },&#xA;    &quot;TOP_RIGHT&quot;: {&#xA;      &quot;mapping_key&quot;: &quot;mapping_TR&quot;,&#xA;      &quot;filled&quot;: &quot;PipePatterns.Filled.TOP_RIGHT&quot;,&#xA;      &quot;unfilled&quot;: &quot;PipePatterns.Unfilled.TOP_RIGHT&quot;&#xA;    },&#xA;    &quot;BOTTOM_LEFT&quot;: {&#xA;      &quot;mapping_key&quot;: &quot;mapping_BL&quot;,&#xA;      &quot;filled&quot;: &quot;PipePatterns.Filled.BOTTOM_LEFT&quot;,&#xA;      &quot;unfilled&quot;: &quot;PipePatterns.Unfilled.BOTTOM_LEFT&quot;&#xA;    },&#xA;    &quot;BOTTOM_RIGHT&quot;: {&#xA;      &quot;mapping_key&quot;: &quot;mapping_BR&quot;,&#xA;      &quot;filled&quot;: &quot;PipePatterns.Filled.BOTTOM_RIGHT&quot;,&#xA;      &quot;unfilled&quot;: &quot;PipePatterns.Unfilled.BOTTOM_RIGHT&quot;&#xA;    },&#xA;    &quot;CROSS&quot;: {&#xA;      &quot;mapping_key&quot;: &quot;mapping_CROSS&quot;,&#xA;      &quot;filled&quot;: &quot;PipePatterns.Filled.CROSS&quot;,&#xA;      &quot;unfilled&quot;: &quot;PipePatterns.Unfilled.CROSS&quot;&#xA;    }&#xA;  }&#xA;}"/>
+    </eAnnotations>
+    <eLiterals name="HORIZONTAL"/>
+    <eLiterals name="VERTICAL" value="1"/>
+    <eLiterals name="TOP_LEFT" value="2"/>
+    <eLiterals name="TOP_RIGHT" value="3"/>
+    <eLiterals name="BOTTOM_LEFT" value="4"/>
+    <eLiterals name="BOTTOM_RIGHT" value="5"/>
+    <eLiterals name="CROSS" value="6"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="TerminationType">
+    <eLiterals name="SOURCE"/>
+    <eLiterals name="SINK" value="1"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EDataType" name="cellarray" instanceClassName="edu.pa19.Cell[][]"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Pa19Helper">
+    <eOperations name="createGame" eType="#//Game">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value=" Game game = Pa19Factory.eINSTANCE.createGame();&#xA;&#xA;        // 1. Initialize and set up Map&#xA;        Map map = Pa19Factory.eINSTANCE.createMap();&#xA;        map.setRows(rows);&#xA;        map.setCols(cols);&#xA;        map.setCell(cells);&#xA;        game.setMap(map);&#xA;&#xA;        // 2. Initialize and set up PipeQueue (call the fixed Helper method)&#xA;     // 2. Initialize and set up PipeQueue (complete assembly directly here)&#xA;        PipeQueue pq = Pa19Factory.eINSTANCE.createPipeQueue();&#xA;        List&lt;Pipe> internalPipeList = pq.getPipeQueue(); // Get the underlying EMF EList&#xA;        &#xA;        // If initial preset pipes were parsed from the file, add them first&#xA;        if (pipes != null) {&#xA;            internalPipeList.addAll(pipes);&#xA;        }&#xA;        // Fill the queue until it reaches the maximum length&#xA;        while (internalPipeList.size() &lt; pq.getMaxGenLength()) {&#xA;            internalPipeList.add(pq.generateNewPipe());&#xA;        }&#xA;        game.setPipeQueue(pq);&#xA;&#xA;        // 3. Initialize and set up DelayBar&#xA;        DelayBar delayBar = Pa19Factory.eINSTANCE.createDelayBar();&#xA;        delayBar.eSet(Pa19Package.Literals.DELAY_BAR__INITIAL_VALUE, delay);&#xA;        delayBar.setCurrentValue(delay);&#xA;        game.setDelayBar(delayBar);&#xA;        &#xA;        // 4. Initialize empty CellStack&#xA;        game.setCellStack(Pa19Factory.eINSTANCE.createCellStack());&#xA;&#xA;        return game;"/>
+      </eAnnotations>
+      <eParameters name="rows" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+      <eParameters name="cols" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+      <eParameters name="delay" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+      <eParameters name="cells" eType="#//cellarray"/>
+      <eParameters name="pipes" upperBound="-1" eType="#//Pipe"/>
+    </eOperations>
+    <eOperations name="gameFromString" eType="#//Game">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="  // 1. Use Deserializer to parse the text string into a Cell[][] 2D array&#xA;        Cell[][] cells = Deserializer.parseString(rows, cols, cellsRep);&#xA;        // 2. Pass the parsed 2D array directly to the createGame method above for overall assembly&#xA;        return createGame(rows, cols, delay, cells, pipes);"/>
+      </eAnnotations>
+      <eParameters name="rows" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+      <eParameters name="cols" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+      <eParameters name="delay" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+      <eParameters name="cellsRep" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+      <eParameters name="pipes" upperBound="-1" eType="#//Pipe"/>
+    </eOperations>
+    <eOperations name="createMap" eType="#//Map">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value=" Map map = Pa19Factory.eINSTANCE.createMap();&#xA;        map.setRows(rows);&#xA;        map.setCols(cols);&#xA;        map.setCell(cells);&#xA;&#xA;        for (int r = 0; r &lt; rows; ++r) {&#xA;            for (int c = 0; c &lt; cols; ++c) {&#xA;                Cell cell = cells[r][c];&#xA;                if (cell instanceof TerminationCell) {&#xA;                    TerminationCell tCell = (TerminationCell) cell;&#xA;                    if (tCell.getType() == TerminationType.SOURCE) {&#xA;                        if (map.getSourceCell() != null) {&#xA;                            throw new IllegalArgumentException(&quot;Multiple source cells found&quot;);&#xA;                        }&#xA;                        map.setSourceCell(tCell);&#xA;                    } else if (tCell.getType() == TerminationType.SINK) {&#xA;                        if (map.getSinkCell() != null) {&#xA;                            throw new IllegalArgumentException(&quot;Multiple sink cells found&quot;);&#xA;                        }&#xA;                        map.setSinkCell(tCell);&#xA;                    }&#xA;                }&#xA;            }&#xA;        }&#xA;&#xA;        if (map.getSourceCell() == null || map.getSinkCell() == null) {&#xA;            throw new IllegalArgumentException(&quot;Source or sink cell not found&quot;);&#xA;        }&#xA;&#xA;        return map;"/>
+      </eAnnotations>
+      <eParameters name="rows" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+      <eParameters name="cols" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+      <eParameters name="cells" eType="#//cellarray"/>
+    </eOperations>
+    <eOperations name="mapFromString" eType="#//Map">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value=" Cell[][] cells = Deserializer.parseString(rows, cols, cellsRep);&#xA;        return createMap(rows, cols, cells);"/>
+      </eAnnotations>
+      <eParameters name="rows" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+      <eParameters name="cols" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+      <eParameters name="cellsRep" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eOperations>
+    <eOperations name="cellFromChar" eType="#//Cell">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="  &#x9;switch (c) {&#xA;&#x9;    &#x9;case 'W':&#xA;&#x9;    &#x9;return createWall(coord);&#xA;&#x9;    &#x9;case '.':&#xA;&#x9;    &#x9;return createFillableCell(coord, null);&#xA;&#x9;    &#x9;case '^':&#xA;&#x9;    &#x9;return terminationType == null ? null : createTerminationCell(coord, terminationType, Direction.UP);&#xA;&#x9;    &#x9;case '>':&#xA;&#x9;    &#x9;return terminationType == null ? null : createTerminationCell(coord, terminationType, Direction.RIGHT);&#xA;&#x9;    &#x9;case '&lt;':&#xA;&#x9;    &#x9;return terminationType == null ? null : createTerminationCell(coord, terminationType, Direction.LEFT);&#xA;&#x9;    &#x9;case 'v':&#xA;&#x9;    &#x9;return terminationType == null ? null : createTerminationCell(coord, terminationType, Direction.DOWN);&#xA;&#x9;    &#x9;default:&#xA;&#x9;    &#x9;return null;&#xA;&#x9;    &#x9;}"/>
+      </eAnnotations>
+      <eParameters name="c" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EChar"/>
+      <eParameters name="coord" eType="#//Coordinate"/>
+      <eParameters name="terminationType" eType="#//TerminationType"/>
+    </eOperations>
+    <eOperations name="createWall" eType="#//Wall">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="  Wall wall = Pa19Factory.eINSTANCE.createWall();&#xA;        wall.setCoord(coord);&#xA;        return wall;"/>
+      </eAnnotations>
+      <eParameters name="coord" eType="#//Coordinate"/>
+    </eOperations>
+    <eOperations name="createFillableCell" eType="#//FillableCell">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="  FillableCell cell = Pa19Factory.eINSTANCE.createFillableCell();&#xA;            cell.setCoord(coord);&#xA;            // If an initial pipe was passed in, assemble it into the cell&#xA;            if (pipes != null) {&#xA;                cell.setPipe(pipes);&#xA;            }&#xA;            return cell;"/>
+      </eAnnotations>
+      <eParameters name="coord" eType="#//Coordinate"/>
+      <eParameters name="pipes" eType="#//Pipe"/>
+    </eOperations>
+    <eOperations name="createTerminationCell" eType="#//TerminationCell">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="  TerminationCell cell = Pa19Factory.eINSTANCE.createTerminationCell();&#xA;        cell.setCoord(coord);&#xA;        cell.setType(type);&#xA;        cell.setPointingTo(dir);&#xA;        // Boolean attributes in EMF default to false, so no need to manually call setFilled(false)&#xA;        return cell;"/>
+      </eAnnotations>
+      <eParameters name="coord" eType="#//Coordinate"/>
+      <eParameters name="type" eType="#//TerminationType"/>
+      <eParameters name="dir" eType="#//Direction"/>
+    </eOperations>
+    <eOperations name="pipeFromString" eType="#//Pipe">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="  if (rep == null) {&#xA;            throw new IllegalArgumentException(&quot;Unknown shape&quot;);&#xA;        }&#xA;&#xA;        String actualRep = rep.trim();&#xA;&#xA;        PipeShape shape;&#xA;        switch (actualRep) {&#xA;            case &quot;HZ&quot;:&#xA;                shape = PipeShape.HORIZONTAL;&#xA;                break;&#xA;            case &quot;VT&quot;:&#xA;                shape = PipeShape.VERTICAL;&#xA;                break;&#xA;            case &quot;TL&quot;:&#xA;                shape = PipeShape.TOP_LEFT;&#xA;                break;&#xA;            case &quot;TR&quot;:&#xA;                shape = PipeShape.TOP_RIGHT;&#xA;                break;&#xA;            case &quot;BL&quot;:&#xA;                shape = PipeShape.BOTTOM_LEFT;&#xA;                break;&#xA;            case &quot;BR&quot;:&#xA;                shape = PipeShape.BOTTOM_RIGHT;&#xA;                break;&#xA;            case &quot;CR&quot;:&#xA;                shape = PipeShape.CROSS;&#xA;                break;&#xA;            default:&#xA;                throw new IllegalArgumentException(&quot;Unknown shape&quot;);&#xA;        }&#xA;&#xA;        Pipe pipe = Pa19Factory.eINSTANCE.createPipe();&#xA;        pipe.setShape(shape);&#xA;        return pipe;"/>
+      </eAnnotations>
+      <eParameters name="rep" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eOperations>
+    <eOperations name="getOpposite" eType="#//Direction">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value=" switch (dir) {&#xA;            case UP:&#xA;                return Direction.DOWN;&#xA;            case DOWN:&#xA;                return Direction.UP;&#xA;            case LEFT:&#xA;                return Direction.RIGHT;&#xA;            case RIGHT:&#xA;                return Direction.LEFT;&#xA;            default:&#xA;                throw new IllegalStateException(&quot;Unknown direction: &quot; + dir);&#xA;        }"/>
+      </eAnnotations>
+      <eParameters name="dir" eType="#//Direction"/>
+    </eOperations>
+    <eOperations name="getOffset" eType="#//Coordinate">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="Coordinate offset = Pa19Factory.eINSTANCE.createCoordinate();&#xA;        switch (dir) {&#xA;            case UP:&#xA;                offset.setRow(-1);&#xA;                offset.setCol(0);&#xA;                break;&#xA;            case DOWN:&#xA;                offset.setRow(1);&#xA;                offset.setCol(0);&#xA;                break;&#xA;            case LEFT:&#xA;                offset.setRow(0);&#xA;                offset.setCol(-1);&#xA;                break;&#xA;            case RIGHT:&#xA;                offset.setRow(0);&#xA;                offset.setCol(1);&#xA;                break;&#xA;            default:&#xA;                throw new IllegalStateException(&quot;Unknown direction: &quot; + dir);&#xA;        }&#xA;        return offset;"/>
+      </eAnnotations>
+      <eParameters name="dir" eType="#//Direction"/>
+    </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="MapElement" abstract="true" interface="true">
+    <eOperations name="toSingleChar" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EChar">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+    </eOperations>
+  </eClassifiers>
+</ecore:EPackage>

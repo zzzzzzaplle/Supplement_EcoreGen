@@ -1,0 +1,32 @@
+public class Car {
+    private String plate;
+    private String model;
+    private double dailyPrice;
+
+    public Car() {
+    }
+
+    public String getPlate() {
+        return this.plate;
+    }
+
+    public void setPlate(String plate) {
+        this.plate = plate;
+    }
+
+    public String getModel() {
+        return this.model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+
+    public double getDailyPrice() {
+        return this.dailyPrice;
+    }
+
+    public void setDailyPrice(double dailyPrice) {
+        this.dailyPrice = dailyPrice;
+    }
+}

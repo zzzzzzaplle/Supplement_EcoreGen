@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="project" nsURI="http://www.example.org/project" nsPrefix="project">
+  <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+    <details key="requirement" value="A company is comprised of two to eight departments. Each department has an ID and email. A department hires employees for certain projects. Employees working on projects can be temporary employees or permanent employees. Each employee is identified by a name, email, employee ID, employee number. Projects can be of types - production projects, research projects, education projects, and community projects. All projects have a title, description, budget amount, and deadline. In addition, each education project and community project are associated with one funding group. The funding group can be of types - private group, government group, or mixed group. The production projects are characterized by a site code.&#xA;&#xA;functional requirement：&#xA;1.Total budget of all projects in a company.Calculate the sum of the budget amounts of all projects in all departments of a company. &#xA;&#xA;2.Average budget of all projects in a department.Calculate the average budget amount of all projects in a given department.&#xA;&#xA;3.Count the distinct number of employees who work on at least one production projects in the company. An employee working on multiple production projects is counted only once.&#xA;&#xA;4.Funding group type of all community projects in a department.Retrieve the funding group type of all community projects within a given department.&#xA;&#xA;5.Manage departments in a company. Ensure that the company always has between 2 and 8 departments (inclusive). Allow adding a new department with unique name only if the current number of departments is less than 8, and allow removing an existing department by name only if the current number of departments is greater than 2; reject any operation that would violate these constraints. When the number of departments exceeds the maximum limit or falls below the minimum limit, throw an IllegalStateException; when the department name is duplicate, null, empty, or the target department to remove does not exist, throw an IllegalArgumentException."/>
+  </eAnnotations>
+  <eClassifiers xsi:type="ecore:EClass" name="Company">
+    <eOperations name="calculateTotalBudget" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eOperations name="countEmployeesInProductionProjects" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eOperations name="addDepartment">
+      <eParameters name="department" eType="#//Department"/>
+    </eOperations>
+    <eOperations name="removeDepartment" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString">
+      <eParameters name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="departments" lowerBound="2"
+        upperBound="8" eType="#//Department" containment="true" eOpposite="#//Department/company"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Department">
+    <eOperations name="calculateAverageBudget" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eOperations name="getFundingGroupTypeCommunityProjects" upperBound="-1" eType="#//FundingGroupType"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="ID" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="email" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="employees" upperBound="-1"
+        eType="#//Employee" containment="true" eOpposite="#//Employee/department"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="company" lowerBound="1"
+        eType="#//Company" eOpposite="#//Company/departments"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="projects" upperBound="-1"
+        eType="#//Project" containment="true" eOpposite="#//Project/department"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Employee">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" eType="#//EmployeeType"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="email" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="ID" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="number" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="department" lowerBound="1"
+        eType="#//Department" eOpposite="#//Department/employees"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Project" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="title" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="description" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="budget" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="deadline" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="department" lowerBound="1"
+        eType="#//Department" eOpposite="#//Department/projects"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="workingEmployees" upperBound="-1"
+        eType="#//Employee"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ProductionProject" eSuperTypes="#//Project">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="siteCode" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ResearchProject" eSuperTypes="#//Project"/>
+  <eClassifiers xsi:type="ecore:EClass" name="EducationProject" eSuperTypes="#//Project">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="fundingGroup" lowerBound="1"
+        eType="#//FundingGroup" eOpposite="#//FundingGroup/educationProjects"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="CommunityProject" eSuperTypes="#//Project">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="fundingGroup" lowerBound="1"
+        eType="#//FundingGroup" eOpposite="#//FundingGroup/communityProjects"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="EmployeeType">
+    <eLiterals name="TEMPORARY"/>
+    <eLiterals name="PERMANENT" value="1"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="FundingGroupType">
+    <eLiterals name="PRIVATE"/>
+    <eLiterals name="GOVERNMENT" value="1"/>
+    <eLiterals name="MIXED" value="2"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FundingGroup">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" eType="#//FundingGroupType"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="educationProjects" upperBound="-1"
+        eType="#//EducationProject" eOpposite="#//EducationProject/fundingGroup"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="communityProjects" upperBound="-1"
+        eType="#//CommunityProject" eOpposite="#//CommunityProject/fundingGroup"/>
+  </eClassifiers>
+</ecore:EPackage>

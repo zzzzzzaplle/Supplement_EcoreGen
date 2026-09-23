@@ -1,0 +1,92 @@
+/**
+ * A source or sink cell. The arrow direction is the direction water flows (out of a source, into a sink).
+ */
+public class TerminationCell extends Cell {
+
+    private boolean isFilled;
+    public Direction pointingTo;
+    public TerminationType type;
+
+    public TerminationCell() {
+        super();
+        this.isFilled = false;
+        this.pointingTo = Direction.UP;
+        this.type = TerminationType.SOURCE;
+    }
+
+    public TerminationCell(Coordinate coord) {
+        super(coord);
+        this.isFilled = false;
+        this.pointingTo = Direction.UP;
+        this.type = TerminationType.SOURCE;
+    }
+
+    public TerminationCell(Coordinate coord, TerminationType type, Direction pointingTo) {
+        super(coord);
+        this.isFilled = false;
+        this.type = type;
+        this.pointingTo = pointingTo;
+    }
+
+    public void setFilled() {
+        this.isFilled = true;
+    }
+
+    public boolean getIsFilled() {
+        return isFilled;
+    }
+
+    public void setIsFilled(boolean isFilled) {
+        this.isFilled = isFilled;
+    }
+
+    public Direction getPointingTo() {
+        return pointingTo;
+    }
+
+    public void setPointingTo(Direction pointingTo) {
+        this.pointingTo = pointingTo;
+    }
+
+    public TerminationType getType() {
+        return type;
+    }
+
+    public void setType(TerminationType type) {
+        this.type = type;
+    }
+
+    @Override
+    public char toSingleChar() {
+        if (pointingTo == null) {
+            throw new IllegalStateException("Invalid pointingTo value!");
+        }
+        if (isFilled) {
+            switch (pointingTo) {
+                case UP:
+                    return PipePatterns.Filled.UP_ARROW;
+                case DOWN:
+                    return PipePatterns.Filled.DOWN_ARROW;
+                case LEFT:
+                    return PipePatterns.Filled.LEFT_ARROW;
+                case RIGHT:
+                    return PipePatterns.Filled.RIGHT_ARROW;
+                default:
+                    throw new IllegalStateException("Invalid pointingTo value!");
+            }
+        } else {
+            switch (pointingTo) {
+                case UP:
+                    return PipePatterns.Unfilled.UP_ARROW;
+                case DOWN:
+                    return PipePatterns.Unfilled.DOWN_ARROW;
+                case LEFT:
+                    return PipePatterns.Unfilled.LEFT_ARROW;
+                case RIGHT:
+                    return PipePatterns.Unfilled.RIGHT_ARROW;
+                default:
+                    throw new IllegalStateException("Invalid pointingTo value!");
+            }
+        }
+    }
+}

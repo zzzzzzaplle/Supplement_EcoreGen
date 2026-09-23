@@ -1,0 +1,4 @@
+enum DigitalItemOption {
+    DOWNLOADABLE,
+    DISC
+}

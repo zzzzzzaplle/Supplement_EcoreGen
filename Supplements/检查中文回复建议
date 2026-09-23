@@ -1,0 +1,223 @@
+Listed directory Supplements
+Ran command: `powershell -Command "Get-ChildItem -Recurse | Where-Object { $_.Name -match '[\u4e00-\u9fff]' } | Select-Object FullName"`
+Used tool: manage_task
+Used tool: manage_task
+Ran command: `python --version`
+Created find_chinese.py
+Ran command: `python C:\Users\Zeqing\.gemini\antigravity-ide\brain\87114ef6-2398-4b70-aefb-ff8c2615b63c\scratch\find_chinese.py .`
+Used tool: manage_task
+Viewed task-18.log
+Listed directory EcoreGenTLShowcase
+Listed directory Experiments
+Used tool: manage_task
+Used tool: manage_task
+Created find_chinese.py
+Ran command: `python C:\Users\Zeqing\.gemini\antigravity-ide\brain\87114ef6-2398-4b70-aefb-ff8c2615b63c\scratch\find_chinese.py . C:\Users\Zeqing\.gemini\antigravity-ide\brain\87114ef6-2398-4b70-aefb-ff8c2615b63c\scratch\report.json`
+Used tool: manage_task
+Created analyze_report.py
+Ran command: `python C:\Users\Zeqing\.gemini\antigravity-ide\brain\87114ef6-2398-4b70-aefb-ff8c2615b63c\scratch\analyze_report.py`
+Created check_non_raw.py
+Ran command: `python -X utf8 C:\Users\Zeqing\.gemini\antigravity-ide\brain\87114ef6-2398-4b70-aefb-ff8c2615b63c\scratch\check_non_raw.py`
+Created check_raw.py
+Ran command: `python -X utf8 C:\Users\Zeqing\.gemini\antigravity-ide\brain\87114ef6-2398-4b70-aefb-ff8c2615b63c\scratch\check_raw.py`
+Created check_bench.py
+Ran command: `python -X utf8 C:\Users\Zeqing\.gemini\antigravity-ide\brain\87114ef6-2398-4b70-aefb-ff8c2615b63c\scratch\check_bench.py`
+Created check_outside_exp.py
+Ran command: `python -X utf8 C:\Users\Zeqing\.gemini\antigravity-ide\brain\87114ef6-2398-4b70-aefb-ff8c2615b63c\scratch\check_outside_exp.py`
+Created check_jar.py
+Ran command: `python -X utf8 C:\Users\Zeqing\.gemini\antigravity-ide\brain\87114ef6-2398-4b70-aefb-ff8c2615b63c\scratch\check_jar.py`
+Created check_jar_custom.py
+Ran command: `python -X utf8 C:\Users\Zeqing\.gemini\antigravity-ide\brain\87114ef6-2398-4b70-aefb-ff8c2615b63c\scratch\check_jar_custom.py`
+Created check_jar_text.py
+Ran command: `python -X utf8 C:\Users\Zeqing\.gemini\antigravity-ide\brain\87114ef6-2398-4b70-aefb-ff8c2615b63c\scratch\check_jar_text.py`
+Listed directory src
+Ran command: `python -c "import os; print(os.path.exists(r'c:\Users\Zeqing\Desktop\新建文件夹\Supplements\软件工程相关A_B类会议期刊整理.md'))"`
+Ran command: `python -c "import os; print(os.listdir(r'c:\Users\Zeqing\Desktop\新建文件夹'))"`
+Created check_raw_benchmarks.py
+Ran command: `python -X utf8 C:\Users\Zeqing\.gemini\antigravity-ide\brain\87114ef6-2398-4b70-aefb-ff8c2615b63c\scratch\check_raw_benchmarks.py`
+Ran command: `python -c "import json; data=json.load(open(r'C:\Users\Zeqing\.gemini\antigravity-ide\brain\87114ef6-2398-4b70-aefb-ff8c2615b63c\scratch\report.json', encoding='utf-8')); print([k for k in data['content_matches'] if 'PA19' in k and 'Benchmarks' in k])"`
+Ran command: `python -c "import json; data=json.load(open(r'C:\Users\Zeqing\.gemini\antigravity-ide\brain\87114ef6-2398-4b70-aefb-ff8c2615b63c\scratch\report.json', encoding='utf-8')); matches=[(k,v) for k,v in data['content_matches'].items() if 'PA19' in k and 'Raw Results' in k]; print(matches[0][0]); [print(l) for l in matches[0][1][:5]]"`
+Ran command: `python -c "import json; data=json.load(open(r'C:\Users\Zeqing\.gemini\antigravity-ide\brain\87114ef6-2398-4b70-aefb-ff8c2615b63c\scratch\report.json', encoding='utf-8')); print([k for k in data['content_matches'] if 'RQ3' in k])"`
+Created inspect_non_ascii.py
+Ran command: `python -X utf8 C:\Users\Zeqing\.gemini\antigravity-ide\brain\87114ef6-2398-4b70-aefb-ff8c2615b63c\scratch\inspect_non_ascii.py`
+Ran command: `python -c "import os; print(os.path.exists(r'.git'))"`
+Created count_extensions.py
+Ran command: `python C:\Users\Zeqing\.gemini\antigravity-ide\brain\87114ef6-2398-4b70-aefb-ff8c2615b63c\scratch\count_extensions.py`
+Created check_anonymity.py
+Ran command: `python -X utf8 C:\Users\Zeqing\.gemini\antigravity-ide\brain\87114ef6-2398-4b70-aefb-ff8c2615b63c\scratch\check_anonymity.py`
+Used tool: manage_task
+Viewed EcoreGenTL-TLBench-tests.py:1-40
+Searched for "zeqing"
+Searched for "zeqing"
+Ran command: `python -c "content = open(r'Experiments/RQ1/Scripts/Test/EcoreGenTL-TLBench-tests.py', encoding='utf-8').readlines(); [print(i+1, line) for i, line in enumerate(content) if 'zeqing' in line.lower()]"`
+Created check_user_paths.py
+Ran command: `python -X utf8 C:\Users\Zeqing\.gemini\antigravity-ide\brain\87114ef6-2398-4b70-aefb-ff8c2615b63c\scratch\check_user_paths.py`
+Used tool: manage_task
+Used tool: manage_task
+Used tool: manage_task
+
+已对仓库进行全量深度扫描（包括文件名、目录名、所有 30,000+ 代码与配置文件、以及打包的 JAR 包内部资源）。
+
+---
+
+### 一、 总体排查概览
+
+- **目录与文件名**：未发现包含中文字符的目录或文件名（0 处）。
+- **根目录及 Showcase 文档**：
+  - [README.md](file:///c:/Users/Zeqing/Desktop/新建文件夹/Supplements/README.md)、[EcoreGenTLShowcase/README.md](file:///c:/Users/Zeqing/Desktop/新建文件夹/Supplements/EcoreGenTLShowcase/README.md)、[Prompt_Templates.md](file:///c:/Users/Zeqing/Desktop/新建文件夹/Supplements/EcoreGenTLShowcase/Prompt_Templates.md) **均未出现中文**。
+- **命中中文的文件总数**：**993 个文件**（共计 7,105 行含中文字符或全角标点）：
+  - **核心基准（Benchmarks）**：34 个文件（包含 Ecore 模型、测试用例、UML 标注及 PlantUML）
+  - **实验执行脚本（Scripts）**：6 个 MWE2 配置文件
+  - **打包的二进制工具（JAR 包内部）**：2 个 Xtend 源码文件
+  - **大模型生成原始结果（Raw Results）**：953 个 Java 生成文件（共 6,965 行）
+- **额外发现（双盲匿名风险）**：发现含有包含作者姓名与机构全称的硬编码本地路径。
+
+---
+
+### 二、 重点排查清单与具体位置
+
+#### 1. 打包工具 JAR 内部源码（高优先级）
+在 [EcoreGenTL.jar](file:///c:/Users/Zeqing/Desktop/新建文件夹/Supplements/EcoreGenTLShowcase/EcoreGenTL.jar) 内部打包的源码文件中发现了中文注释：
+- `edu/ustb/sei/ai/LLMPort.xtend`：
+  - Line 55: `// 匹配 ```json ... ``` 或 ``` ... ``` 格式`
+  - Line 58: `// 获取第一个捕获组（json后的内容）或第二个捕获组（普通代码块内容）`
+  - Line 65: `// 如果没有匹配到代码块，返回原字符串`
+- `edu/ustb/sei/mde/eecg/facade/IEcoreGenCLI.xtend`：
+  - Line 20, Line 54: `mode.setRequired(false); // 设置为必需参数`
+
+---
+
+#### 2. 基准数据集定义（Benchmarks 模型与设计文档）
+- [Experiments/Benchmarks/JavaBench/PA20/PA20.ecore](file:///c:/Users/Zeqing/Desktop/新建文件夹/Supplements/Experiments/Benchmarks/JavaBench/PA20/PA20.ecore)（5 处操作体注解含有中文注释）：
+  - Line 115: `// EMF 的 players 映射为 EList 直接操作`
+  - Line 119: `// 初始化二维数组，使用 EDataType ...`
+  - Line 125: `// 使用 EMF Factory 实例化 Place`
+  - Line 130: `// 使用 getPlayers().get(index) 访问 EList 中的元素`
+  - Line 155: `// 使用 EMF 原生的复制机制作为基础`、`// 浅拷贝 Piece 引用即可...`
+- [Experiments/Benchmarks/JavaBench/PA22/PA22.plantuml](file:///c:/Users/Zeqing/Desktop/新建文件夹/Supplements/Experiments/Benchmarks/JavaBench/PA22/PA22.plantuml)：
+  - Line 147: `+ getMaxWidth() ：int`（误输入了全角中文冒号 `：`）
+- [Experiments/Benchmarks/TLBench/OPMS/project.ecore](file:///c:/Users/Zeqing/Desktop/新建文件夹/Supplements/Experiments/Benchmarks/TLBench/OPMS/project.ecore)：
+  - Line 5: `functional requirement：`（含有全角中文冒号 `：`）
+- [Experiments/Benchmarks/TLBench/OPRS/conference.ecore](file:///c:/Users/Zeqing/Desktop/新建文件夹/Supplements/Experiments/Benchmarks/TLBench/OPRS/conference.ecore)：
+  - Line 5: `functional requirement：`（含有全角中文冒号 `：`）
+- [Experiments/Benchmarks/TLBench/OPMS/UML_DESIGNED_level3.md](file:///c:/Users/Zeqing/Desktop/新建文件夹/Supplements/Experiments/Benchmarks/TLBench/OPMS/UML_DESIGNED_level3.md)：
+  - Line 12, 26, 50, 70, 86, 102: `//getter，setter`（含有全角中文逗号 `，`）
+- [Experiments/Benchmarks/TLBench/R144_AirlineFlights/UML_DESIGNED_level3.md](file:///c:/Users/Zeqing/Desktop/新建文件夹/Supplements/Experiments/Benchmarks/TLBench/R144_AirlineFlights/UML_DESIGNED_level3.md)：
+  - Line 54, 73: `//getter，setter`（含有全角中文逗号 `，`）
+
+---
+
+#### 3. 基准测试用例（Test Code）
+测试代码中存在中文注释，审阅人运行或阅读测试时会直接看到：
+- **JavaBench PA20**:
+  - [ConsolePlayerTests.java](file:///c:/Users/Zeqing/Desktop/新建文件夹/Supplements/Experiments/Benchmarks/JavaBench/PA20/testcode_EcoreGenTL/ConsolePlayerTests.java)：`// 当前字符串结束，切换到下一个`、`// 递归读取下一个字符串`
+- **JavaBench PA21**（**17 个测试文件**，共 88 行中文注释）：
+  - 包括 [DirectionTest.java](file:///c:/Users/Zeqing/Desktop/新建文件夹/Supplements/Experiments/Benchmarks/JavaBench/PA21/testcode_EcoreGenTL/DirectionTest.java)、[EntityCellTest.java](file:///c:/Users/Zeqing/Desktop/新建文件夹/Supplements/Experiments/Benchmarks/JavaBench/PA21/testcode_EcoreGenTL/EntityCellTest.java)、[GameBoardControllerTest.java](file:///c:/Users/Zeqing/Desktop/新建文件夹/Supplements/Experiments/Benchmarks/JavaBench/PA21/testcode_EcoreGenTL/GameBoardControllerTest.java)、[GameControllerTest.java](file:///c:/Users/Zeqing/Desktop/新建文件夹/Supplements/Experiments/Benchmarks/JavaBench/PA21/testcode_EcoreGenTL/GameControllerTest.java) 等文件中的 `// 辅助函数：创建Position对象`、`// EMF生成的类使用protected构造函数` 等。
+- **TLBench**:
+  - [OPMS/testcode_Baseline/CR1_TotalBudgetofAllProjectsTest.java](file:///c:/Users/Zeqing/Desktop/新建文件夹/Supplements/Experiments/Benchmarks/TLBench/OPMS/testcode_Baseline/CR1_TotalBudgetofAllProjectsTest.java) & `CR4_FundingGroupTypeTest.java`：粘贴了中文 javac 编译器警告（`* 注: ...使用或覆盖了已过时的 API`）。
+  - [OPRS/testcode_Baseline/CR2_PaperConsensusTest.java](file:///c:/Users/Zeqing/Desktop/新建文件夹/Supplements/Experiments/Benchmarks/TLBench/OPRS/testcode_Baseline/CR2_PaperConsensusTest.java)：`// 有未提交`、`// 不一致`。
+  - [R12_RentedCarGalleryManagementSystem/testcode_Baseline/CR2_RevenueCalculationTest.java](file:///c:/Users/Zeqing/Desktop/新建文件夹/Supplements/Experiments/Benchmarks/TLBench/R12_RentedCarGalleryManagementSystem/testcode_Baseline/CR2_RevenueCalculationTest.java) & `CR3_OverdueRentalsTest.java`：`// ① Toyota Camry, 100 CNY × 3 天 = 300`、`// 未到期`、`// 两条逾期`、`// 已归还` 等。
+  - [R144_AirlineFlights/testcode_Baseline/](file:///c:/Users/Zeqing/Desktop/新建文件夹/Supplements/Experiments/Benchmarks/TLBench/R144_AirlineFlights/testcode_Baseline/)（`CR1`、`CR4`、`CR5`）：`// Helper methods (A模式)`。
+  - [R22_IPOApplication/testcode_EcoreGenTL/CR2Test.java](file:///c:/Users/Zeqing/Desktop/新建文件夹/Supplements/Experiments/Benchmarks/TLBench/R22_IPOApplication/testcode_EcoreGenTL/CR2Test.java) & `CR3Test.java`：`// 初始 eligible`、`// eligible 才能创建申请（CR1约束）`。
+
+---
+
+#### 4. 实验复现脚本（Scripts）
+位于 [Experiments/RQ1/Scripts/CodeGen/EcoreGenTL/](file:///c:/Users/Zeqing/Desktop/新建文件夹/Supplements/Experiments/RQ1/Scripts/CodeGen/EcoreGenTL/) 下的 6 个 `.mwe2` 文件中：
+- `R123_School.mwe2`、`R132_MunicipalLibrary.mwe2`、`R2_EmployeeManagementSystem.mwe2` 等：
+  - `var rootPath = ".." // 工作区根目录`
+  - `basePackage = "edu" //原来是edu.company`
+
+---
+
+#### 5. 实验大模型生成结果（Raw Results，共 953 个文件）
+分布在 `RQ1/Raw Results` (317个) 与 `RQ2/Raw Results` (636个) 中，集中在以下四个任务：
+- **PA20** (388个文件)
+- **PA21** (251个文件)
+- **PA22** (161个文件)
+- **PA19** (153个文件)
+
+> **原因分析**：主要是由于提示词/Ecore 输入（如 PA20/PA21/PA22）本身包含了中文注释，或者部分国内基模（如 DeepSeek）在补全 Java 类方法时自主生成了中文代码注释（如 `// 1. 实例化 Helper`、`// 5. 直接使用 EMF 的 Coordinate` 等）。
+
+---
+
+### 三、 额外警示：双盲评审（Anonymity）信息泄露点
+
+在扫描过程中，发现了以下**直接泄露作者姓名与学校信息**的内容：
+
+1. **测试脚本中的绝对路径**（包含作者姓名与机构标识）：
+   - [Experiments/RQ1/Scripts/Test/EcoreGenTL-TLBench-tests.py](file:///c:/Users/Zeqing/Desktop/新建文件夹/Supplements/Experiments/RQ1/Scripts/Test/EcoreGenTL-TLBench-tests.py)：
+     - Line 86: `r"C:\Users\Zeqing\OneDrive\2025-USTB\iecoregen\result-RQ2\E-Workspace"`
+     - Line 89: `LIB_DIR = Path(r"C:\Users\Zeqing\OneDrive\2025-USTB\iecoregen\lib")`
+     - Line 702: `report_dir = Path(r"C:\Users\Zeqing\OneDrive\2025-USTB\iecoregen\Codebase_Python\reports")`
+2. **JAR 包内部及 Ecore 命名空间中的机构标识**：
+   - 包含多处 `edu.ustb.sei`（北京科技大学计算机与通信工程学院/软件工程研究所）包路径与命名空间。
+
+---
+
+### 四、 建议处理方案
+
+1. **针对 Benchmarks、Scripts 与 UML（优先级最高）**：
+   - 将上述 34 个基准文件与 6 个 `.mwe2` 脚本中的中文注释翻译为英文，全角符号（`：`、`，`）替换为半角英文字符（`:`、`,`）。
+2. **针对 EcoreGenTL.jar**：
+   - 源码中的中文注释清理后重新构建，或从 JAR 包内剔除源码文件（只保留 `.class` 编译字节码与资源文件），同时确认是否需要将 `edu.ustb` 泛化为匿名包名前缀（如 `org.ecoregentl`）。
+3. **针对 Python 测试脚本**：
+   - 将 `EcoreGenTL-TLBench-tests.py` 中的 `C:\Users\Zeqing\...` 改为相对路径或环境变量配置。
+4. **针对 Raw Results 中的大模型生成代码**：
+   - 可以使用脚本批量将注释中的中文清理或机器翻译为英文，避免审阅人抽查生成代码时触发双盲或语言限制规则。
+
+如需自动执行批量替换或清理脚本，请随时告知！
+
+## 回复2 
+**并不会仅仅因为补充材料中出现了几个中文字符就“系统自动秒拒（Desk Reject）”，但它会在评审中引发两条极其致命的连锁反应，严重时直接导致拒稿。**
+
+特别是结合本次排查的结果，你需要重点防范的是**附带引发的“双盲泄密”硬伤**以及**审稿人层面的“可复现性打压”**。
+
+---
+
+### 一、 真正的致命硬伤：双盲评审违规（Double-Blind Review Violation）
+
+ICSE 等顶会（如 FSE、ASE、ISSTA）采用极其严格的双盲评审（Double-Blind）。
+- **纯粹的语言问题**：组委会（PC Chairs）不会在提交系统里用脚本去正则匹配几万个文件是否有汉字，少量的中文字符本身**不属于预设的自动 Desk Reject 触发条件**。
+- **但中文背后的身份泄露是致命的**：
+  在本次排查中，在测试脚本（[EcoreGenTL-TLBench-tests.py](file:///c:/Users/Zeqing/Desktop/新建文件夹/Supplements/Experiments/RQ1/Scripts/Test/EcoreGenTL-TLBench-tests.py)）中发现了：
+  ```python
+  r"C:\Users\Zeqing\OneDrive\2025-USTB\iecoregen\result-RQ2\E-Workspace"
+  ```
+  以及 JAR 包内存在的 `edu.ustb.sei`（北京科技大学）。
+  
+  **国际会议对此的处理极其果断**：
+  只要有任何一个审稿人在尝试复现运行测试或查看脚本时，看到了作者的名字拼音（`Zeqing`）或机构缩写（`USTB`），根据 ICSE 规定，审稿人**有义务直接向 PC Chair（程序委员会主席）举报双盲违规**。Chair 一旦核实无误，**论文会被立即 Desk Reject（无条件直接拒稿）**。
+
+---
+
+### 二、 审稿人维度的隐形扣分：可复现性与偏见（Reproducibility & Bias）
+
+如果侥幸没有被抓到双盲违规，非英文内容仍会在审稿阶段带来严重的负面评分：
+
+1. **不可读与编码乱码（Reviewer Friction）**：
+   国际审稿人绝大多数来自欧美，其操作系统多为英文字符集环境（如 UTF-8 无 BOM、或拉丁编码）。包含中文的测试代码在他们的终端运行时，极易出现字符乱码（Mojibake，如一堆 ``），甚至可能导致测试输出断言失败。审稿人无法阅读注释，会直接在评价中写下：“*Artifact documentation/code contains non-English comments, hindering reproducibility and validation.*”（严重扣分）。
+2. **研究严谨性受到质疑（Construct Validity）**：
+   论文如果是关于“基于大语言模型或模型驱动工程的代码生成”，若评测基准（Benchmarks，如 `PA20.ecore`）中残留了中文提示词或注释，审稿人会质疑：“基准是否来自中文数据集？”、“是否由于语言混合导致 LLM 理解偏差？”这会直接动摇实验结论的置信度。
+
+---
+
+### 三、 仓库中各部分的危险等级评估
+
+| 区域 | 危险等级 | 潜在后果 | 建议处理方式 |
+| :--- | :---: | :--- | :--- |
+| **测试脚本中的绝对路径** (`Zeqing`, `USTB`) | 🔴 **极度危险** | **直接触发双盲违规拒稿** | **必须彻底清除**，改成相对路径或环境变量 |
+| **JAR 包内源码与包名** (`EcoreGenTL.jar`) | 🔴 **极度危险** | 泄露机构信息与中文注释 | 重新打包，移除源码或统一匿名化包名前缀 |
+| **基准与测试用例** (`PA20.ecore`, `testcode`) | 🟠 **高危** | 审稿人重点阅读/执行区域，影响评分 | 将中文注释翻译为英文，全角标点替换为半角 |
+| **复现配置文件** (`.mwe2` 脚本) | 🟠 **高危** | 运行复现时可见，显得不专业 | 清理或翻译为英文 |
+| **大模型生成原始输出** (`Raw Results`, 953 个文件) | 🟡 **中危** | 审稿人一般只抽查，不会逐个看 | 审稿人通常理解为 LLM 自主行为，若来得及可批量清洗，否则优先级低于前几项 |
+
+---
+
+### 四、 总结与建议行动
+
+1. **如果在投稿修改期/附录补交阶段**：
+   请务必尽快将**硬编码路径、JAR 包源码、Benchmarks 及测试脚本**中的中文与身份信息清理干净。
+2. **如果已经提交且无法修改**：
+   - 如果审稿人没有主动去翻该 Python 脚本的深层路径，论文依然会正常进入打分环节。
+   - 提前准备好在 **Rebuttal（作者回应）阶段** 的解释预案：若审稿人指出非英文问题，可回应“*部分基准测试中残留的辅助性调试注释为开发过程遗留，已在修订版及公开 Artifact 中全部标准化为英文，且绝不影响实验逻辑与模型输入。*”

@@ -1,0 +1,182 @@
+@startuml
+    abstract class Game {
+    # configuration : Configuration
+    # board : Piece[][]
+    # currentPlayer : Player
+    # numMoves : int
+
+    + {abstract} start() : Player
+    + {abstract} getWinner(lastPlayer : Player, lastPiece : Piece, lastMove : Move) : Player
+    + {abstract} updateScore(player : Player, piece : Piece, move : Move) : void
+    + {abstract} movePiece(move : Move) : void
+    + {abstract} getAvailableMoves(player : Player) : Move[]
+
+    + refreshOutput() : void
+    + clone() : Game
+  }
+
+  class JesonMor {
+    + JesonMor(configuration : Configuration)
+    + start() : Player
+    + getWinner(lastPlayer : Player, lastPiece : Piece, lastMove : Move) : Player
+    + updateScore(player : Player, piece : Piece, move : Move) : void
+    + movePiece(move : Move) : void
+    + getAvailableMoves(player : Player) : Move[]
+  }
+
+  class Configuration {
+    - size : int
+    - players : Player[]
+    - initialBoard : Piece[][]
+    - centralPlace : Place
+    - numMovesProtection : int
+
+    + addInitialPiece(piece : Piece, place : Place) : void
+    + addInitialPiece(piece : Piece, x : int, y : int) : void
+    + clone() : Configuration
+  }
+
+  abstract class Piece {
+    - player : Player
+    + getLabel() : char
+    + getAvailableMoves(game : Game, source : Place) : Move[]
+  }
+
+  class Knight {
+    + getLabel() : char
+    + getAvailableMoves(game : Game, source : Place) : Move[]
+  }
+
+  class Archer {
+    + getLabel() : char
+    + getAvailableMoves(game : Game, source : Place) : Move[]
+  }
+
+  abstract class Player {
+    # name : String
+    # score : int
+    # color : Color
+
+    + nextMove(game : Game, availableMoves : Move[]) : Move
+    + clone() : Player
+  }
+
+  class ConsolePlayer {
+    + nextMove(game : Game, availableMoves : Move[]) : Move
+  }
+
+  class RandomPlayer {
+    + nextMove(game : Game, availableMoves : Move[]) : Move
+  }
+
+  class Move {
+    - source : Place
+    - destination : Place
+
+    + equals(o : Object) : boolean
+    + hashCode() : int
+    + toString() : String
+    + clone() : Move
+  }
+
+  class Place {
+    - x : int
+    - y : int
+
+    + clone() : Place
+  }
+
+  
+  enum Color {
+    DEFAULT
+    BLACK
+    RED
+    GREEN
+    YELLOW
+    BLUE
+    PURPLE
+    CYAN
+    WHITE
+    - ansiColor: String
+    + toString() : String
+  }
+
+ 
+
+
+  interface Rule {
+    + validate(game : Game, move : Move) : boolean
+    + getDescription() : String
+  }
+
+  class VacantRule {
+    + validate(game : Game, move : Move) : boolean
+    + getDescription() : String
+  }
+
+  class OccupiedRule {
+    + validate(game : Game, move : Move) : boolean
+    + getDescription() : String
+  }
+
+  class OutOfBoundaryRule {
+    + validate(game : Game, move : Move) : boolean
+    + getDescription() : String
+  }
+
+  class NilMoveRule {
+    + validate(game : Game, move : Move) : boolean
+    + getDescription() : String
+  }
+
+  class FirstNMovesProtectionRule {
+    - numProtectedMoves : int
+    + validate(game : Game, move : Move) : boolean
+    + getDescription() : String
+  }
+
+  class KnightMoveRule {
+    + validate(game : Game, move : Move) : boolean
+    + getDescription() : String
+  }
+
+  class KnightBlockRule {
+    + validate(game : Game, move : Move) : boolean
+    + getDescription() : String
+  }
+
+  class ArcherMoveRule {
+    + validate(game : Game, move : Move) : boolean
+    + getDescription() : String
+  }
+
+
+  Game <|-- JesonMor
+  Piece <|-- Knight
+  Piece <|-- Archer
+  Player <|-- ConsolePlayer
+  Player <|-- RandomPlayer
+
+  Rule <|.. VacantRule
+  Rule <|.. OccupiedRule
+  Rule <|.. OutOfBoundaryRule
+  Rule <|.. NilMoveRule
+  Rule <|.. FirstNMovesProtectionRule
+  Rule <|.. KnightMoveRule
+  Rule <|.. KnightBlockRule
+  Rule <|.. ArcherMoveRule
+
+  Game "1" *-- "1" Configuration : configuration
+Game "1" o-- "*" Piece : board
+  Game "0..1" o-- "1" Player : currentPlayer
+
+Configuration "1" *-- "2" Player : players
+Configuration "1" *-- "*" Piece : initialBoard
+Configuration "1" *-- "1" Place : centralPlace
+
+  Piece "1" *-- "1" Player : player
+
+  Move "1" *-- "1" Place : source
+  Move "1" *-- "1" Place : destination
+
+  @enduml

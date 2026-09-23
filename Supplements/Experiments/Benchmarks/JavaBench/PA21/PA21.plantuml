@@ -1,0 +1,192 @@
+@startuml
+
+  interface BoardElement {
+    + toUnicodeChar() : char
+    + toASCIIChar() : char
+  }
+
+  abstract class Cell {
+    - position : Position
+  }
+
+  enum Direction {
+    UP
+    DOWN
+    LEFT
+    RIGHT
+    + getOffset() : PositionOffset
+    + getRowOffset() : int
+    + getColOffset() : int
+  }
+
+  abstract class Entity {
+    - owner : EntityCell
+    + setowner(ownner: EntityCell): EntityCell
+  }
+
+  class EntityCell {
+    ~ entity: Entity
+
+    + setentity(newEntity: Entity): Entity
+    + toUnicodeChar(): char
+    + toASCIIChar(): char
+  }
+
+  class ExtraLife {
+  }
+
+  class GameBoard {
+    + numRows : int
+    + numCols : int
+    + board : Cell[][]
+    + player : Player
+    
+    + getRow(r:int) : Cell[]
+    + getCol(c:int) : Cell[]
+    + getCell(r:int, c:int) : Cell
+    + getNumGems() : int
+    + getEntityCell(r:int, c:int) : EntityCell
+    + getEntityCell(position:Position) : EntityCel
+  }
+
+  class GameBoardController {
+    + makeMove(direction : Direction) : MoveResult
+    + undoMove(prevMove : MoveResult) : void
+  }
+
+  class GameBoardView {
+    + output(useUnicodeChars : boolean) : void
+  }
+
+  class GameController {
+    + processMove(direction : Direction) : MoveResult
+    + processUndo() : boolean
+  }
+
+  class GameState {
+    + {static} UNLIMITED_LIVES : int = -1
+    - numDeaths : int
+    - numMoves : int
+    - numLives : int
+    - initialNumOfGems : int
+    + hasWon() : boolean
+    + hasLost() : boolean
+    + hasUnlimitedLives() :boolean
+    + increaseNumLives(delta : int) : int
+    + decreaseNumLives(delta : int) : int
+    + decrementNumLives() : int
+    + incrementNumMoves() : int
+    + incrementNumDeaths() : int
+    + getNumGems() : int
+    + getScore() : int
+    + getGameBoardController() : GameBoardController
+    + getGameBoardView() : GameBoardView
+    + getGameBoard() : GameBoard
+    + getMoveStack() : MoveStack
+  }
+
+  class Gem {
+  }
+  class Mine {
+  }
+
+  abstract class MoveResult {
+    + newPosition : Position
+  }
+
+  class Valid {
+    + origPosition : Position
+  }
+
+  class Alive {
+    + collectedGems : List<Position>
+    + collectedExtraLives : List<Position>
+  }
+
+  class Dead {
+    + minePosition : Position
+  }
+
+  class Invalid {
+  }
+
+  class MoveStack {
+    - popCount : int
+    - stack : Deque<MoveResult>
+    + push(move: MoveResult) : void
+    + pop() : MoveResult
+    + peek() : MoveResult
+    + isEmpty() : boolean
+  }
+
+  class Player {
+  }
+
+  class Position {
+    - row : int
+    - col : int
+    + offsetBy(dRow : int, dCol : int) : Position
+    + offsetBy(offset : PositionOffset) : Position
+    + offsetByOrNull(dRow : int, dCol : int, numRows : int, numCols : int) : Position
+    + offsetByOrNull(offset : PositionOffset, numRows : int, numCols : int) : Position
+  }
+
+  class PositionOffset {
+    - dRow : int
+    - dCol : int
+  }
+
+  class StopCell {
+    + setentity(newEntity : Entity) : Entity
+    + setPlayer(newPlayer : Player) : Player
+    + toUnicodeChar() : char
+    + toASCIIChar() : char
+  }
+
+  class Wall {
+    + toUnicodeChar() : char
+    + toASCIIChar() : char
+  }
+
+  BoardElement <|.. Cell
+  BoardElement <|.. Entity
+
+  Cell ..|> BoardElement
+  Cell <|-- Wall
+  Cell <|-- EntityCell
+  EntityCell <|-- StopCell
+
+  Entity <|-- ExtraLife
+  Entity <|-- Gem
+  Entity <|-- Mine
+  Entity <|-- Player
+
+  MoveResult <|-- Valid
+  MoveResult <|-- Invalid
+  Valid <|-- Alive
+  Valid <|-- Dead
+
+  Cell "1" *-- "1" Position : position
+
+  EntityCell "1" o-- "0..1" Entity : contains
+  Entity "0..1" --> "1" EntityCell : owner
+
+  GameBoard "1" *-- "1" Player : player
+
+  GameState "1" *-- "1" GameBoard : gameBoard
+  GameState "1" *-- "1" MoveStack : moveStack
+
+  MoveStack "1" *-- "0..*" MoveResult : moves
+
+  GameBoardView "1" *-- "1" GameBoard : gameBoard
+
+  GameBoardController "1" *-- "1" GameBoard : gameBoard
+  GameController "1" *-- "1" GameState : gameState
+
+  Direction ..> PositionOffset : creates
+
+  GameState ..> GameBoardController : creates/returns
+  GameState ..> GameBoardView : creates/returns
+  GameController ..> MoveResult : returns
+
+  @enduml

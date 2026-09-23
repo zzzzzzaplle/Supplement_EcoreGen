@@ -1,0 +1,5 @@
+// ==version1==
+```
+Store assistants manage a rented-car gallery for each store. Each store keeps a store name together with the car records, rental records, and overdue-notice records that belong to that location. Every car record stores a plate number, model, and daily price. Customer records store the renter's name, surname, and address. Rental records store the rental date, due date, return date, total price, and leasing terms, and connect the rented car with the customer who rents it. When a customer wants to rent a car, the system shows the cars that are currently available and sorts them by daily price. The system records each rental, calculates total rental revenue, lists overdue customers when the current date passes a due date and the car has not been returned, computes the average daily price of all cars in the store, and counts how many rentals each customer has made. The main office issues overdue notices for late returns, and every overdue notice keeps a notice number so the notice can be tracked for the target customer.
+```
+// ==end==

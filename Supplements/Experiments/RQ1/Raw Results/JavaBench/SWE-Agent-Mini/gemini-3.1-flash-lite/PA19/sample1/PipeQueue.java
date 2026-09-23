@@ -1,0 +1,20 @@
+import java.util.LinkedList;
+import java.util.List;
+
+public class PipeQueue {
+    private static int MAX_GEN_LENGTH = 5;
+    private LinkedList<Pipe> pipeQueue = new LinkedList<>();
+
+    public PipeQueue() {}
+    public PipeQueue(List<Pipe> pipes) {
+        pipeQueue.addAll(pipes);
+    }
+
+    public Pipe peek() { return pipeQueue.peek(); }
+    public void consume() { pipeQueue.removeFirst(); }
+    public void undo(Pipe pipe) { pipeQueue.addFirst(pipe); }
+    private static Pipe generateNewPipe() { return new Pipe(); }
+
+    public LinkedList<Pipe> getPipeQueue() { return pipeQueue; }
+    public void setPipeQueue(LinkedList<Pipe> pipeQueue) { this.pipeQueue = pipeQueue; }
+}

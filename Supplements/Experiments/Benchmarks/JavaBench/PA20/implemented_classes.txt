@@ -1,0 +1,303 @@
+ArcherMoveRule.java
+    @Override
+    public boolean validate(Game game, Move move) {
+        if (!(game.getPiece(move.getSource()) instanceof Archer)) {
+            return true;
+        }
+        // TODO implementation
+        return false;
+    }
+    @Override
+    public String getDescription() {
+        return "archer move rule is violated";
+    }
+
+FirstNMovesProtectionRule.java
+ public String getDescription() {
+        return "Capturing piece in the first " + this.numProtectedMoves + " moves are not allowed";
+    }
+
+VacantRule.java
+@Override
+    public String getDescription() {
+        return "the source of move should have a piece";
+    }
+
+OccupiedRule.java
+@Override
+    public String getDescription() {
+        return "piece cannot be captured by another piece belonging to the same player";
+    }
+
+OutOfBoundaryRule.java
+public String getDescription() {
+        return "place is out of boundary of gameboard";
+    }
+
+NilMoveRule.java
+ public String getDescription() {
+        return "the source and destination of move should be different places";
+    }
+
+KnightMoveRule.java
+public String getDescription() {
+        return "knight move rule is violated";
+    }
+
+KnightBlockRule.java
+public String getDescription() {
+        return "knight is blocked by another piece";
+    }
+
+Player.java:
+@Override
+public Player clone() throws CloneNotSupportedException {
+        return (Player) super.clone();
+    }
+public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Player player = (Player) o;
+        return name.equals(player.name);
+    }
+@Override
+public int hashCode() {
+        return Objects.hash(name);
+    }
+Archer.java
+ public char getLabel() {
+        return 'A';
+    }
+Knight.java
+public char getLabel() {
+        return 'K';
+    }
+Game.java:
+public Piece getPiece(Place place) {
+    return this.board[place.getX()][place.getY()];
+}
+
+public Piece getPiece(int x, int y) {
+    Place place = new Place();      
+    place.setX(x);                
+    place.setY(y);                
+    return this.getPiece(place);
+}
+public void refreshOutput() {
+        int size = this.configuration.getSize();
+        ArrayList<List<String>> contents = new ArrayList<List<String>>();
+        for (int row = size - 1; row >= 0; row--) {
+            ArrayList<String> rowContent = new ArrayList<String>();
+            for (int col = 0; col < size; col++) {
+                Piece piece = this.getPiece(col, row);
+                if (piece == null) {
+                    if (this.getCentralPlace().equals(new Place(col, row))) {
+                        rowContent.add("x");
+                    } else {
+                        rowContent.add(".");
+                    }
+                } else {
+                    Player player = piece.getPlayer();
+                    rowContent.add(String.format("%s%c%s",
+                            player.getColor(),
+                            piece.getLabel(),
+                            Color.DEFAULT));
+                }
+            }
+            contents.add(rowContent);
+        }
+        ArrayList<String> xCoordinates = new ArrayList<String>();
+        for (int i = 0; i < size; i++) {
+            xCoordinates.add(String.valueOf((char) ('a' + i)));
+        }
+        Collections.reverse(contents);
+
+        // clear screen
+        System.out.print("\u001b[2J");
+        System.out.flush();
+
+        System.out.println();
+        System.out.println("### COMP3021 Programming Assignment 1 ###");
+        System.out.println();
+        System.out.println("Guide: to move a piece, input the coordinate of source and the destination.");
+        System.out.println("For example: a1->b2 means to move the piece at 'a1' to 'b2'");
+        if (this.numMoves < this.configuration.getNumMovesProtection()) {
+            System.out.println();
+            System.out.println("Notice: first " + this.configuration.getNumMovesProtection() + " moves are not allowed to" +
+                    " capture pieces or win the game.");
+        }
+        System.out.println();
+        System.out.println("Total Moves: " + this.numMoves);
+        // print scores of players
+        for (Player player :
+                this.configuration.getPlayers()) {
+            System.out.printf("%s%s%s score: %d\n", player.getColor(), player.getName(), Color.DEFAULT,
+                    player.getScore());
+        }
+        System.out.println();
+        // print the gameboard
+        int leftPadding = 8;
+        StringBuilder paddingSpaceBuilder = new StringBuilder();
+        paddingSpaceBuilder.append(" ".repeat(leftPadding));
+        System.out.printf("%s%s\n",
+                paddingSpaceBuilder.toString(),
+                xCoordinates.parallelStream()
+                        .collect(Collectors.joining(" ")));
+        StringBuilder borderBuilder = new StringBuilder();
+        borderBuilder.append("-".repeat(Math.max(0, contents.get(0).size() * 2 - 1)));
+        System.out.printf("%s%s\n",
+                paddingSpaceBuilder.toString(),
+                borderBuilder.toString());
+        for (int row = contents.size() - 1; row >= 0; row--) {
+            System.out.printf("%" + (leftPadding - 1) + "d|%s|%d\n",
+                    row + 1,
+                    contents.get(row).parallelStream().map(Object::toString).collect(Collectors.joining(" ")),
+                    row + 1);
+        }
+        System.out.printf("%s%s\n",
+                paddingSpaceBuilder.toString(),
+                borderBuilder.toString());
+        System.out.printf("%s%s\n",
+                paddingSpaceBuilder.toString(),
+                xCoordinates.parallelStream()
+                        .collect(Collectors.joining(" ")));
+        System.out.println();
+    }
+ @Override
+    public Game clone() throws CloneNotSupportedException {
+        Game cloned = (Game) super.clone();
+        cloned.configuration = this.configuration.clone();
+        cloned.board = this.board.clone();
+        for (int i = 0; i < this.configuration.getSize(); i++) {
+            cloned.board[i] = this.board[i].clone();
+            // no need to deep copy pieces
+            if (this.configuration.getSize() >= 0)
+                System.arraycopy(this.board[i], 0, cloned.board[i], 0, this.configuration.getSize());
+        }
+        cloned.currentPlayer = currentPlayer == null ? null : currentPlayer.clone();
+        return cloned;
+    }
+
+Configuration.java
+    
+    /**
+     * Constructor of configuration
+     *
+     * @param size size of the gameboard.
+     * @param players an array of two players in the game, the first player should move first when game starts.
+     * @param numMovesProtection the first number of moves where capturing pieces is not allowed
+     */
+    public Configuration(int size, Player[] players, int numMovesProtection) {
+        // validate size
+        if (size < 3) {
+            throw new InvalidConfigurationError("size of gameboard must be at least 3");
+        }
+        if (size % 2 != 1) {
+            throw new InvalidConfigurationError("size of gameboard must be an odd number");
+        }
+        if (size > 25) {
+            throw new InvalidConfigurationError("size of gameboard is at most 25");
+        }
+        this.size = size;
+        // We only have 2 players
+        this.players = players;
+        if (players.length != 2) {
+            throw new InvalidConfigurationError("there must be exactly two players");
+        }
+        // initialize map of the game board by putting every place null (meaning no piece)
+        this.initialBoard = new Piece[size][];
+        for (int x = 0; x < size; x++) {
+            this.initialBoard[x] = new Piece[size];
+            for (int y = 0; y < size; y++) {
+                this.initialBoard[x][y] = null;
+            }
+        }
+        // calculate the central place
+        this.centralPlace = new Place(size / 2, size / 2);
+
+        if (numMovesProtection < 0) {
+            throw new InvalidConfigurationError("number of moves with capture protection cannot be negative");
+        }
+        this.numMovesProtection = numMovesProtection;
+    }
+
+    public Configuration(int size, Player[] players) {
+        this(size, players, 0);
+    }
+  /**
+     * Add piece to the initial gameboard.
+     * The player that this piece belongs to will be automatically added into the configuration.
+     *
+     * @param piece piece to be added
+     * @param place place to put the piece
+     */
+    public void addInitialPiece(Piece piece, Place place) {
+        if (!piece.getPlayer().equals(this.players[0]) && !piece.getPlayer().equals(this.players[1])) {
+            throw new InvalidConfigurationError("the player of the piece is unknown");
+        }
+        if (place.getX() >= this.size || place.getY() >= this.size) {
+            // The place must be inside the gameboard
+            throw new InvalidConfigurationError("the place" + place.toString() + " must be inside the gameboard");
+        }
+        if (place.equals(this.centralPlace)) {
+            throw new InvalidConfigurationError("piece cannot be put at central place initially");
+        }
+
+        // put the piece on the initial board
+        this.initialBoard[place.getX()][place.getY()] = piece;
+    }
+
+    public void addInitialPiece(Piece piece, int x, int y) {
+        this.addInitialPiece(piece, new Place(x, y));
+    }
+  public Configuration clone() throws CloneNotSupportedException {
+        Configuration cloned = (Configuration) super.clone();
+        cloned.players = this.players.clone();
+        for (int i = 0; i < this.players.length; i++) {
+            cloned.players[i] = this.players[i].clone();
+        }
+        cloned.initialBoard = this.initialBoard.clone();
+        for (int i = 0; i < this.size; i++) {
+            cloned.initialBoard[i] = this.initialBoard[i].clone();
+            // no need to deep copy piece
+            System.arraycopy(this.initialBoard[i], 0, cloned.initialBoard[i], 0, this.size);
+        }
+        cloned.centralPlace = this.centralPlace.clone();
+        return cloned;
+    }
+Move.java
+  @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Move move = (Move) o;
+        return source.equals(move.source) &&
+                destination.equals(move.destination);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(source, destination);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Move.class.getSimpleName() + "[", "]")
+                .add("source=" + source)
+                .add("destination=" + destination)
+                .toString();
+    }
+
+    @Override
+    public Move clone() throws CloneNotSupportedException {
+        Move cloned = (Move) super.clone();
+        cloned.source = this.source.clone();
+        cloned.destination = this.destination.clone();
+        return cloned;
+    }
+InvalidConfigurationError.java:
+public class InvalidConfigurationError extends Error {
+    public InvalidConfigurationError(String message) {
+        super(message);
+    }
+}

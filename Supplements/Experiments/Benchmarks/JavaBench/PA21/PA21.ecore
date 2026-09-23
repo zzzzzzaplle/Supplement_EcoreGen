@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="pa21" nsURI="http://www.example.org/pa21" nsPrefix="pa21">
+  <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+    <details key="requirement" value="1.Overview&#xA;This project implements a grid-based puzzle game called Inertia. The core mechanic is inertial sliding: once the player chooses a direction, the character slides continuously in that direction until it hits a Wall or enters a StopCell. The objective is to navigate the board to collect all Gems while avoiding Mines that cause death and life loss. The game features a scoring system, life management, and an Undo system to backtrack moves.&#xA;2.Functional Requirements&#xA;The system manages 2D grid coordinates and their deltas through the Position and PositionOffset classes for all&#xA;movement calculations and boundary checks. In GameBoardController.makeMove, when a move is initiated via a Direction,&#xA;the player piece moves step-by-step from its current Position. If the player successfully slides at least one cell and the movement ends by a normal stopping condition, such as a Wall, boundary, or StopCell, without hitting a Mine, the result is Alive. During an Alive move, any Gem or ExtraLife passed through is collected, removed from the board, and recorded in the Alive result.&#xA; Sliding stops immediately before a Wall, at the board boundary, or exactly&#xA;on a StopCell. StopCell is a special cell type that can only contain a Player entity. Hitting a Mine causes a Dead result and stops movement. The position recorded for the player after a Dead move is the original position. The board remains unchanged from before the move, and any Gem or ExtraLife passed before the Mine is not collected or removed.&#xA;A move returns&#xA;Invalid when the player cannot move at all (blocked by Wall or boundary on the first step, resulting in zero movement&#xA;distance). Every move must return a MoveResult (Alive, Dead, or Invalid); collected Gems and ExtraLives are recorded only in Alive results.&#xA; In GameState, getNumGems() returns the number of Gems still present on the GameBoard (i.e., remaining Gems).A player wins when there are no Gems left on the board (getNumGems() == 0). A player loses when lives reach zero (unless in unlimited lives mode).For scoring, the number of collected Gems is initialNumOfGems - getNumGems(), and the score is calculated as : Score = InitialBoardSize + (CollectedGems * 10) - (Moves * 1) - (Undoes * 2) - (Deaths * 4). If numLives is less than zero, the player has unlimited lives, and&#xA;getNumLives returns Integer.MAX_VALUE. &#xA;In GameController.processMove, Invalid moves do not change counters and are not pushed to the MoveStack. Alive moves increment numMoves, apply collected ExtraLife effects, and are pushed to the MoveStack. Dead moves increment numMoves and numDeaths, decrease finite lives by one, and are not pushed to the MoveStack. Only Alive moves are undoable.&#xA;processUndo pops one Alive move if available, restores the player position and collected Gems/ExtraLives, reverses finite ExtraLife gains, and returns true. If no move is available, it returns false. Undo does not decrement numMoves; undo count is represented by MoveStack.popCount.&#xA;&#xA;GameStateSerializer: A tool for loading/saving the game state from/to text format, handling the mapping between characters (W, P, S, G, M, L) and Ecore classes. &#xA;InertiaTextGame: The main runner handling the STDIN loop and parsing user commands like U, D, Undo, or Quit. "/>
+  </eAnnotations>
+  <eClassifiers xsi:type="ecore:EEnum" name="Direction">
+    <eLiterals name="UP"/>
+    <eLiterals name="DOWN" value="1"/>
+    <eLiterals name="LEFT" value="2"/>
+    <eLiterals name="RIGHT" value="3"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Position">
+    <eOperations name="offsetBy1" eType="#//Position">
+      <eParameters name="dRow" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+      <eParameters name="dCol" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    </eOperations>
+    <eOperations name="offsetBy2" eType="#//Position">
+      <eParameters name="offset" eType="#//PositionOffset"/>
+    </eOperations>
+    <eOperations name="offsetByOrNull1" eType="#//Position">
+      <eParameters name="dRow" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+      <eParameters name="dCol" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+      <eParameters name="numRows" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+      <eParameters name="numCols" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    </eOperations>
+    <eOperations name="offsetByOrNull2" eType="#//Position">
+      <eParameters name="offset" eType="#//PositionOffset"/>
+      <eParameters name="numRows" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+      <eParameters name="numCols" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="col" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="row" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="PositionOffset">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dCol" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dRow" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Cell" abstract="true" eSuperTypes="#//BoardElement">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="position" eType="#//Position"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Entity" abstract="true" eSuperTypes="#//BoardElement">
+    <eOperations name="setowner" eType="#//EntityCell">
+      <eParameters name="owner" eType="#//EntityCell"/>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="owner" eType="#//EntityCell"
+        eOpposite="#//EntityCell/entity"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Player" eSuperTypes="#//Entity">
+    <eOperations name="toUnicodeChar" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EChar">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="return '\u25EF';"/>
+      </eAnnotations>
+    </eOperations>
+    <eOperations name="toASCIIChar" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EChar">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="return '@';"/>
+      </eAnnotations>
+    </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Gem" eSuperTypes="#//Entity">
+    <eOperations name="toUnicodeChar" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EChar">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value=" return '\u25C7';"/>
+      </eAnnotations>
+    </eOperations>
+    <eOperations name="toASCIIChar" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EChar">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="return '*';"/>
+      </eAnnotations>
+    </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Mine" eSuperTypes="#//Entity">
+    <eOperations name="toUnicodeChar" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EChar">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="return '\u26A0';&#xA;"/>
+      </eAnnotations>
+    </eOperations>
+    <eOperations name="toASCIIChar" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EChar">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="return 'X';"/>
+      </eAnnotations>
+    </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ExtraLife" eSuperTypes="#//Entity">
+    <eOperations name="toUnicodeChar" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EChar">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="return '\u2661';"/>
+      </eAnnotations>
+    </eOperations>
+    <eOperations name="toASCIIChar" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EChar">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="return 'L';"/>
+      </eAnnotations>
+    </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Wall" eSuperTypes="#//Cell">
+    <eOperations name="toUnicodeChar" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EChar">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="return '\u2588';"/>
+      </eAnnotations>
+    </eOperations>
+    <eOperations name="toASCIIChar" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EChar">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="return 'W';"/>
+      </eAnnotations>
+    </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="StopCell" eSuperTypes="#//EntityCell">
+    <eOperations name="setPlayer" eType="#//Player">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+          <details key="generated" value="manual"/>
+        </eAnnotations>
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value=" if (newPlayer != null &amp;&amp; !(newPlayer instanceof Player))&#xA;    {&#xA;      throw new IllegalArgumentException(&quot;StopCell can only contain a Player.&quot;);&#xA;    }&#xA;    setEntity(newPlayer);&#xA;    return newPlayer;"/>
+      </eAnnotations>
+      <eParameters name="newPlayer" eType="#//Player"/>
+    </eOperations>
+    <eOperations name="toUnicodeChar" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EChar">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="return getEntity() != null ? getEntity().toUnicodeChar() : '\u25A1';"/>
+      </eAnnotations>
+    </eOperations>
+    <eOperations name="toASCIIChar" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EChar">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="return getEntity() != null ? getEntity().toASCIIChar() : '#';"/>
+      </eAnnotations>
+    </eOperations>
+    <eOperations name="setentity" eType="#//Entity">
+      <eParameters name="newEntity" eType="#//Entity"/>
+    </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="EntityCell" eSuperTypes="#//Cell">
+    <eOperations name="toUnicodeChar" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EChar">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="return getEntity() != null ? getEntity().toUnicodeChar() : '.';"/>
+      </eAnnotations>
+    </eOperations>
+    <eOperations name="toASCIIChar" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EChar">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="return getEntity() != null ? getEntity().toASCIIChar() : '.';"/>
+      </eAnnotations>
+    </eOperations>
+    <eOperations name="setentity" eType="#//Entity">
+      <eParameters name="newEntity" eType="#//Entity"/>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="entity" eType="#//Entity"
+        containment="true" eOpposite="#//Entity/owner"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="GameBoard">
+    <eOperations name="getRow" upperBound="-1" eType="#//Cell">
+      <eParameters name="row" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    </eOperations>
+    <eOperations name="getCol" upperBound="-1" eType="#//Cell">
+      <eParameters name="col" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    </eOperations>
+    <eOperations name="getEntityCell2" eType="#//EntityCell">
+      <eParameters name="row" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+      <eParameters name="col" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    </eOperations>
+    <eOperations name="getCell1" eType="#//Cell">
+      <eParameters name="row" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+      <eParameters name="col" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    </eOperations>
+    <eOperations name="getCell2" eType="#//Cell">
+      <eParameters name="position" eType="#//Position"/>
+    </eOperations>
+    <eOperations name="getEntityCell1" eType="#//EntityCell">
+      <eParameters name="position" eType="#//Position"/>
+    </eOperations>
+    <eOperations name="getNumGems" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCols" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numRows" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="player" eType="#//Player"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="board" eType="#//CellArray2D"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="GameState">
+    <eOperations name="hasWon" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eOperations name="hasLost" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eOperations name="getScore" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eOperations name="increaseNumLives" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt">
+      <eParameters name="delta" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    </eOperations>
+    <eOperations name="decreaseNumLives" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt">
+      <eParameters name="delta" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    </eOperations>
+    <eOperations name="decrementNumLives" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eOperations name="incrementNumMoves" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eOperations name="incrementNumDeaths" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eOperations name="hasUnlimitedLives" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eOperations name="getnumLives" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eOperations name="getNumGems" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eOperations name="getGameBoardController" eType="#//GameBoardController">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+          <details key="generated" value="manual"/>
+        </eAnnotations>
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value=" GameBoardController controller = Pa21Factory.eINSTANCE.createGameBoardController();&#xA;    controller.setGameBoard(getGameBoard());&#xA;    return controller;"/>
+      </eAnnotations>
+    </eOperations>
+    <eOperations name="getGameBoardView" eType="#//GameBoardView"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="UNLIMITED_LIVES" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        defaultValueLiteral="-1"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numDeaths" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        defaultValueLiteral="0"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numMoves" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        defaultValueLiteral="0"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numLives" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="gameBoard" eType="#//GameBoard"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="moveStack" eType="#//MoveStack"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="initialNumOfGems" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EDataType" name="CellArray2D" instanceClassName="edu.pa21.Cell[][]"/>
+  <eClassifiers xsi:type="ecore:EClass" name="MoveStack">
+    <eOperations name="push">
+      <eParameters name="move" eType="#//MoveResult"/>
+    </eOperations>
+    <eOperations name="pop" eType="#//MoveResult"/>
+    <eOperations name="peek" eType="#//MoveResult"/>
+    <eOperations name="isEmpty" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="popCount" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="moves" upperBound="-1"
+        eType="#//MoveResult" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="MoveResult" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="newPosition" eType="#//Position"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Valid" eSuperTypes="#//MoveResult">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="origPosition" eType="#//Position"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Alive" eSuperTypes="#//Valid">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="collectedExtraLives" upperBound="-1"
+        eType="#//Position"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="collectedGems" upperBound="-1"
+        eType="#//Position"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Dead" eSuperTypes="#//Valid">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="minePosition" eType="#//Position"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Invalid" eSuperTypes="#//MoveResult"/>
+  <eClassifiers xsi:type="ecore:EClass" name="GameController">
+    <eOperations name="processMove" eType="#//MoveResult">
+      <eParameters name="direction" eType="#//Direction"/>
+    </eOperations>
+    <eOperations name="processUndo" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="gameState" eType="#//GameState"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="GameBoardController">
+    <eOperations name="makeMove" eType="#//MoveResult">
+      <eParameters name="direction" eType="#//Direction"/>
+    </eOperations>
+    <eOperations name="undoMove">
+      <eParameters name="prevMove" eType="#//MoveResult"/>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="gameBoard" eType="#//GameBoard"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="GameBoardView">
+    <eOperations name="output">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="// Assume gameBoard is an instance of pa21.GameBoard interface&#xA;for (int r = 0; r &lt; gameBoard.getNumRows(); ++r) {&#xA;    for (int c = 0; c &lt; gameBoard.getNumCols(); ++c) {&#xA;        // Call the getCell1(EInt, EInt) operation defined in Ecore&#xA;        final Cell cell = gameBoard.getCell1(r, c);&#xA;        &#xA;        // Call the EOperation modeled in the Cell interface&#xA;        // These methods already contain concrete logic through Method Injection&#xA;        final char ch = useUnicodeChars ? cell.toUnicodeChar() : cell.toASCIIChar();&#xA;&#xA;        System.out.print(ch);&#xA;    }&#xA;    System.out.println();&#xA;}"/>
+      </eAnnotations>
+      <eParameters name="useUnicodeChars" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="gameBoard" eType="#//GameBoard"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="BoardElement" abstract="true" interface="true">
+    <eOperations name="toUnicodeChar" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EChar">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+    </eOperations>
+    <eOperations name="toASCIIChar" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EChar">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+    </eOperations>
+  </eClassifiers>
+</ecore:EPackage>

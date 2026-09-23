@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="conference" nsURI="http://www.example.org/conference" nsPrefix="conference">
+  <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+    <details key="requirement" value="Online Rideshare System (ORS) manages shared road trips between drivers and customers. Every user is identified by an id and also stores an email address and a phone number so that the platform can distinguish and contact the user.&#xA;&#xA;A driver can publish trips. A trip records a departure station, an arrival station, the number of available seats, a departure date, a departure time, an arrival time, and a price. Trips can be direct or indirect. An indirect trip contains one or more stops, and each stop stores the name of its stop station.&#xA;&#xA;A customer can create bookings for trips. A booking records the requested number of seats, the booking date, the related customer, and the related trip. A booking is valid only when the trip exists, enough seats are still available, the customer has no overlapping booking on the same day, and the booking is made more than two hours before the trip departure time. When a booking is accepted, the trip seat inventory must be reduced accordingly.&#xA;&#xA;Customers may subscribe to a membership package. A membership package stores one or more rewards, and each reward is one of cashback, discounts, or points. A customer with a discount reward receives a 20 percent discount only when the booking is made at least 24 hours before departure. A customer with a points reward earns 5 points per booked seat for bookings created within the requested month.&#xA;&#xA;A driver may publish a new trip only when the proposed trip has a valid time window and does not overlap with the driver’s existing trips. Two indirect trips posted by the same driver are considered overlapping by stops when they share at least one stop station, and stop-name comparison is case-sensitive.&#xA;functional requirement：&#xA;1. Validate Booking Eligibility.&#xA;The system shall determine whether a customer can book seats on a trip. The trip must exist, the trip must still have enough available seats, the requested seats must not exceed the remaining seats, and the customer must not already hold another booking whose trip time overlaps on the same day. The booking time must be strictly earlier than the departure time by more than two hours, so a booking made exactly two hours before departure is rejected. When the booking is accepted, the trip seat count shall be reduced. Invalid inputs such as a null customer, null trip, or null booking date shall return `false`.&#xA;&#xA;2. Calculate Discounted Trip Price.&#xA;The system shall calculate the final price of a booking after reward evaluation. A fixed 20 percent discount applies only when the customer owns a membership package containing the `DISCOUNTS` award and the booking is made at least 24 hours before departure. The returned amount shall keep one decimal place. When the customer, membership package, booking time, or reward condition is invalid or missing, the original trip price shall be returned.&#xA;&#xA;3. Check Stop Overlap for Indirect Trips.&#xA;The system shall determine whether two indirect trips posted by the same driver share at least one common stop station. The comparison is case-sensitive. If either trip is null or one of the stop collections is empty, the result shall be `false`.&#xA;&#xA;4. Compute Monthly Reward Points.&#xA;The system shall compute the reward points earned by a customer during a given month. Only customers whose membership package contains the `POINTS` award are eligible. Only bookings whose booking date falls inside the requested month shall be counted. Each booked seat contributes 5 points. Invalid inputs, missing membership packages, or unsupported rewards shall return `0`.&#xA;&#xA;5. Validate Trip Posting Feasibility.&#xA;The system shall validate whether a driver can publish a new trip. The proposed trip must exist, its departure time and arrival time must be valid, and the departure time must be earlier than the arrival time. The new trip must not overlap with any existing trip of the driver. Completely identical time periods are conflicts, while adjacent boundaries where one trip ends exactly when another starts are allowed. Invalid inputs shall return `false`."/>
+  </eAnnotations>
+  <eClassifiers xsi:type="ecore:EEnum" name="PaperType">
+    <eLiterals name="RESEARCH"/>
+    <eLiterals name="EXPERIENCE" value="1" literal="EXPERIENCE"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="Grade">
+    <eLiterals name="UNDECIDED"/>
+    <eLiterals name="ACCEPT" value="1" literal="ACCEPT"/>
+    <eLiterals name="REJECT" value="2" literal="REJECT"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="UserRole" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="id" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Author" eSuperTypes="#//UserRole">
+    <eOperations name="submitPaper">
+      <eParameters name="paper" eType="#//Paper"/>
+    </eOperations>
+    <eOperations name="countSubmittedPapers" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eOperations name="calculateAcceptanceRate" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="papers" upperBound="-1"
+        eType="#//Paper"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Reviewer" eSuperTypes="#//UserRole">
+    <eOperations name="calculateUnsubmittedReviews" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eOperations name="calculateSubmittedReviewAverageScore" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="assignments" upperBound="-1"
+        eType="#//ReviewAssignment"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="CoChair" eSuperTypes="#//UserRole">
+    <eOperations name="makeFinalDecision" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt">
+      <eParameters name="paper" eType="#//Paper"/>
+      <eParameters name="decision" eType="#//Grade"/>
+    </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="User">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="roles" upperBound="-1"
+        eType="#//UserRole" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Paper">
+    <eOperations name="isAllReviewsConsistent" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="title" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" eType="#//PaperType"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="decision" eType="#//Grade"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="reviews" upperBound="-1"
+        eType="#//ReviewAssignment" eOpposite="#//ReviewAssignment/paper"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ReviewAssignment">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="feedback" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="grade" eType="#//Grade"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="paper" lowerBound="1" eType="#//Paper"
+        eOpposite="#//Paper/reviews"/>
+  </eClassifiers>
+</ecore:EPackage>

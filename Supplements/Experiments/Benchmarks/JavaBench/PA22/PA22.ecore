@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="pa22" nsURI="http://www.example.org/pa22" nsPrefix="pa22">
+  <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+    <details key="requirement" value="1. Overview                                                 &#xA;  This project implements a multi-player variant of the classic grid-based puzzle game called Sokoban. The core mechanic involves players moving around a closed-boundary map to push boxes to&#xA;  specific destinations. A unique feature of this variant is that it supports multiple players (up to 26), and each player can only push their designated boxes. The objective is to navigate the&#xA;  board and strategically place all boxes onto the designated targets. The game features customizable undo quotas, action validation, and a terminal-based text user interface (TUI).&#xA;  ---&#xA;  2. Functional Requirement&#xA;  2.1 Map parsing and validation&#xA;  The system manages 2D grid coordinates through the Position class. The game board is initialized via PA22Helper.parseGameMap, reading a text representation where:&#xA;  - The first line is undo limit.&#xA;  - # denotes walls.&#xA;  - . denotes empty spaces.&#xA;  - @ denotes destinations and the cell itself is an Empty entity.&#xA;  - Upper-case letters denote Player.&#xA;  - Lower-case letters denote Box that is only movable by the player with the corresponding upper-case letter (a ↔ A, b ↔ B, etc.).&#xA;  PA22Helper.parseGameMap also validates the map:&#xA;  - Undo limit must be -1 (unlimited) or a non-negative integer (values &lt; -1 are invalid).&#xA;  - There must be at least one player in the map.&#xA;  - There must be no duplicated players (i.e., the same upper-case letter cannot appear more than once).&#xA;  - The number of destinations must equal the number of boxes.&#xA;  - Boxes must reference valid player IDs that exist in the map, and every player on the map must have corresponding boxes (i.e., the set of box-referenced player IDs equals the set of player IDs&#xA;  on the board).&#xA;  2.2 Game state and moves&#xA;  The dynamic game state is handled by GameState, which keeps track of entities and destinations. During Move actions (Up, Down, Left, Right), a player attempts to move to a nextPosition. A player&#xA;  can move into an Empty space or push a Box. A Box can only be pushed if it belongs to the initiating player (i.e., Box.getPlayerId() matches the Player's ID) and the space behind the box is&#xA;  empty. Movement is blocked by Wall, other players, or unpushable boxes.&#xA;  Each game action must return an ActionResult (Success or Failed with a reason). The game also supports an Exit action: when an Exit action is processed, the game sets an internal exit flag so&#xA;that shouldStop() becomes true and the main game loop terminates. In addition, shouldStop() must also return true&#xA;when the current GameState satisfies the win condition, i.e., GameState.isWin() returns true.&#xA;  2.3 Terminal UI: input, rendering, and main loop&#xA;  Terminal input commands are defined as follows (case-insensitive):&#xA;  - Player 0 uses W (up), A (left), S (down), D (right).&#xA;  - Player 1 uses K (up), H (left), J (down), L (right).&#xA;  - R triggers an Undo action with initiator = 0 (Player 0).&#xA;U triggers an Undo action with initiator = 1 (Player 1).&#xA;  - The command exit triggers an Exit action.&#xA;  - Any other input returns an InvalidInput action with initiator = -1 &#xA;  TerminalSokobanGame is the main runner extending AbstractSokobanGame, coordinating the terminal game loop. It restricts the terminal interface to a maximum of two players: when&#xA;  setState(GameState) is called, if the state contains more than two players, it throws IllegalArgumentException.&#xA;  TerminalSokobanGame.run() renders the initial board state before entering the loop, then repeatedly:&#xA;  1. fetches one action from TerminalInputEngine,&#xA;  2. processes it via processAction,&#xA;  3. prints a message through TerminalRenderingEngine.message(...),&#xA;  4. renders the updated state.&#xA;  During the game loop, the undo quota may be consulted (e.g., via GameState.getUndoQuota()).&#xA;  TerminalRenderingEngine is responsible for rendering the game grid to an output stream. TerminalRenderingEngine.message(String) prints the given content followed by a newline.&#xA;  2.4 Undo and win condition&#xA;  The game provides an Undo mechanism: transitions are accumulated during moves, and a checkpoint is recorded when a box is successfully pushed; checkpoints are stored in a history stack in&#xA;  GameState. When an Undo action is executed, the game reverts using the transition/checkpoint history. Undo transitions must be applied atomically to preserve the correct final state of all&#xA;  entities. undoQuota uses 0 as not allowed and -1 as unlimited, and finite quota is consumed only when there is a checkpoint in history to undo.&#xA;  A game is won (GameState.isWin) when every destination position in the map is currently occupied by a Box.&#xA;  ---&#xA;  3. External Utilities and Known Information&#xA;  SokobanGameFactory &amp; Sokoban: The entry points that load map files, parse the board, and initialize the game engines.&#xA;  StringResources: A utility class centralizing all display messages and prompts (e.g., WIN_MESSAGE, INVALID_INPUT_MESSAGE, UNDO_QUOTA_TEMPLATE)."/>
+  </eAnnotations>
+  <eClassifiers xsi:type="ecore:EClass" name="Action" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="initiator" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ActionResult">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="action" eType="#//Action"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Success" eSuperTypes="#//ActionResult"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Failed" eSuperTypes="#//ActionResult">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="reason" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Exit" eSuperTypes="#//Action"/>
+  <eClassifiers xsi:type="ecore:EClass" name="InvalidInput" eSuperTypes="#//Action">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="message" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Undo" eSuperTypes="#//Action"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Entity" abstract="true"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Box" eSuperTypes="#//Entity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="playerId" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Empty" eSuperTypes="#//Entity"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Player" eSuperTypes="#//Entity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="id" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Wall" eSuperTypes="#//Entity"/>
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractSokobanGame" abstract="true"
+      eSuperTypes="#//SokobanGame">
+    <eOperations name="shouldStop" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="true"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Summary: Determines whether the game loop should terminate.&#xA;Algorithm:&#xA;Related Features: isExitSpecified, state&#xA;Related Classes: GameState&#xA;Input: None.&#xA;Output:&#xA;Pre-condition: None.&#xA;Post-condition: Return value reflects current termination condition."/>
+        <details key="body" value="// TODO: Please generate a body of this unimplemented method based on the docstring&#xD;&#xA;// TODO: Replace the current body with the generated body &#xD;&#xA;// TODO: Ensure that you mark it @generated NOT after code completion&#xD;&#xA;throw new UnsupportedOperationException();&#xD;&#xA;"/>
+      </eAnnotations>
+    </eOperations>
+    <eOperations name="processAction" eType="#//ActionResult">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="true"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Summary: Processes a given game action (Move, Undo, Exit, InvalidInput) by delegating to the appropriate handler, updating the game state, and returning the result.&#xA;Algorithm:&#xA;Related Features: isExitSpecified, state&#xA;Related Classes: GameState, Action, Move, Undo, Exit, InvalidInput, Success, Failed, Position, Player, Box, Wall, Empty&#xA;Input:&#xA;Output:&#xA;Pre-condition:&#xA;Post-condition:"/>
+        <details key="body" value="// TODO: Please generate a body of this unimplemented method based on the docstring&#xD;&#xA;// TODO: Replace the current body with the generated body &#xD;&#xA;// TODO: Ensure that you mark it @generated NOT after code completion&#xD;&#xA;throw new UnsupportedOperationException();&#xD;&#xA;"/>
+      </eAnnotations>
+      <eParameters name="action" eType="#//Action"/>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="isExitSpecified" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
+        defaultValueLiteral="false"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="state" eType="#//GameState"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Position">
+    <eOperations name="equals" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="if (this == o) return true;&#xA;        // Use instanceof to check if it implements the EMF interface&#xA;        if (!(o instanceof Position)) return false;&#xA;       Position position = (Position) o;&#xA;        // Call EMF auto-generated getter methods&#xA;        return this.getX() == position.getX() &amp;&amp; this.getY() == position.getY();"/>
+      </eAnnotations>
+      <eParameters name="o" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EJavaObject"/>
+    </eOperations>
+    <eOperations name="hashCode" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="return java.util.Objects.hash(this.getX(), this.getY());"/>
+      </eAnnotations>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="x" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="y" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="GameMap">
+    <eOperations name="getPlayerIds" upperBound="-1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EIntegerObject"/>
+    <eOperations name="putEntity">
+      <eParameters name="position" eType="#//Position"/>
+      <eParameters name="entity" eType="#//Entity"/>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="maxWidth" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="maxHeight" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="undoLimit" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="destinations" upperBound="-1"
+        eType="#//Position"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="map" transient="true">
+      <eGenericType eClassifier="#//EntityMap">
+        <eTypeArguments eClassifier="#//Position"/>
+        <eTypeArguments eClassifier="#//Entity"/>
+      </eGenericType>
+    </eStructuralFeatures>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="GameState">
+    <eOperations name="move">
+      <eParameters name="from" eType="#//Position"/>
+      <eParameters name="to" eType="#//Position"/>
+    </eOperations>
+    <eOperations name="checkpoint"/>
+    <eOperations name="undo"/>
+    <eOperations name="isWin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eOperations name="getPlayerPositionById" eType="#//Position">
+      <eParameters name="id" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    </eOperations>
+    <eOperations name="getAllPlayerPositions" upperBound="-1" eType="#//Position">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="true"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Summary: Returns a list of positions of all players on the board.&#xA;Algorithm:&#xA;Related Features: entities&#xA;Related Classes: EntityMap, Position, Player&#xA;Input: None.&#xA;Output:&#xA;Pre-condition: entities != null.&#xA;Post-condition: Returned list contains all player positions (may be empty)."/>
+        <details key="body" value="// TODO: Please generate a body of this unimplemented method based on the docstring&#xD;&#xA;// TODO: Replace the current body with the generated body &#xD;&#xA;// TODO: Ensure that you mark it @generated NOT after code completion&#xD;&#xA;throw new UnsupportedOperationException();&#xD;&#xA;"/>
+      </eAnnotations>
+    </eOperations>
+    <eOperations name="getEntity" eType="#//Entity">
+      <eParameters name="position" eType="#//Position"/>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="undoQuota" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="boardWidth" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="boardHeight" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="destinations" upperBound="-1"
+        eType="#//Position"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="currentTransition" eType="#//GameStateTransition"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="history" eType="#//TransitionStack"
+        transient="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="entities" transient="true">
+      <eGenericType eClassifier="#//EntityMap">
+        <eTypeArguments eClassifier="#//Position"/>
+        <eTypeArguments eClassifier="#//Entity"/>
+      </eGenericType>
+    </eStructuralFeatures>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="GameStateTransition">
+    <eOperations name="add">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="java.util.Map&lt;edu.pa22.Position, edu.pa22.Position> movesMap = this.getMoves();&#xA;        if (movesMap == null) {&#xA;            movesMap = new java.util.HashMap&lt;>();&#xA;            this.setMoves(movesMap);&#xA;        }&#xA;&#xA;        final edu.pa22.Position key = movesMap.entrySet().stream()&#xA;                .filter(e -> e.getValue().equals(from))&#xA;                .map(java.util.Map.Entry::getKey)&#xA;                .findFirst().orElse(from);&#xA;        &#xA;        movesMap.put(key, to);"/>
+      </eAnnotations>
+      <eParameters name="from" eType="#//Position"/>
+      <eParameters name="to" eType="#//Position"/>
+    </eOperations>
+    <eOperations name="reverse" eType="#//GameStateTransition">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="java.util.Map&lt;edu.pa22.Position, edu.pa22.Position> movesMap = this.getMoves();&#xA;        if (movesMap == null) {&#xA;            movesMap = new java.util.HashMap&lt;>();&#xA;        }&#xA;&#xA;        final java.util.Map&lt;edu.pa22.Position, edu.pa22.Position> reversedMoves = movesMap.entrySet().stream()&#xA;                .collect(java.util.stream.Collectors.toMap(&#xA;                        java.util.Map.Entry::getValue, &#xA;                        java.util.Map.Entry::getKey&#xA;                ));&#xA;&#xA;        edu.pa22.GameStateTransition reversedTransition = edu.pa22.Pa22Factory.eINSTANCE.createGameStateTransition();&#xA;        reversedTransition.setMoves(reversedMoves);&#xA;        &#xA;        return reversedTransition;"/>
+      </eAnnotations>
+    </eOperations>
+    <eOperations name="toString">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="return &quot;GameStateTransition(moves=&quot; + moves + &quot;)&quot;;"/>
+      </eAnnotations>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="moves" transient="true">
+      <eGenericType eClassifier="#//PositionMap">
+        <eTypeArguments eClassifier="#//Position"/>
+        <eTypeArguments eClassifier="#//Position"/>
+      </eGenericType>
+    </eStructuralFeatures>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RenderingEngine" abstract="true" interface="true">
+    <eOperations name="render">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eParameters name="state" eType="#//GameState"/>
+    </eOperations>
+    <eOperations name="message">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eParameters name="content" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="TerminalSokobanGame" eSuperTypes="#//AbstractSokobanGame">
+    <eOperations name="run"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="inputEngine" eType="#//InputEngine"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="renderingEngine" eType="#//RenderingEngine"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="TerminalInputEngine" eSuperTypes="#//InputEngine">
+    <eOperations name="fetchAction" eType="#//Action"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="terminalScanner" eType="#//Scanner"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="TerminalRenderingEngine" eSuperTypes="#//RenderingEngine">
+    <eOperations name="message">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="outputStream.println(content);&#xA;"/>
+      </eAnnotations>
+      <eParameters name="content" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eOperations>
+    <eOperations name="render">
+      <eParameters name="state" eType="#//GameState"/>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="outputStream" eType="#//PrintStream"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EDataType" name="PrintStream" instanceClassName="java.io.PrintStream"/>
+  <eClassifiers xsi:type="ecore:EDataType" name="Scanner" instanceClassName="java.util.Scanner"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Move" abstract="true" eSuperTypes="#//Action">
+    <eOperations name="nextPosition" eType="#//Position">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eParameters name="currentPosition" eType="#//Position"/>
+    </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Up" eSuperTypes="#//Move">
+    <eOperations name="nextPosition" eType="#//Position">
+      <eParameters name="currentPosition" eType="#//Position"/>
+    </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Down" eSuperTypes="#//Move">
+    <eOperations name="nextPosition" eType="#//Position">
+      <eParameters name="currentPosition" eType="#//Position"/>
+    </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Left" eSuperTypes="#//Move">
+    <eOperations name="nextPosition" eType="#//Position">
+      <eParameters name="currentPosition" eType="#//Position"/>
+    </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Right" eSuperTypes="#//Move">
+    <eOperations name="nextPosition" eType="#//Position">
+      <eParameters name="currentPosition" eType="#//Position"/>
+    </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EDataType" name="EntityMap" instanceClassName="java.util.Map"
+      serializable="false">
+    <eTypeParameters name="key">
+      <eBounds eClassifier="#//Position"/>
+    </eTypeParameters>
+    <eTypeParameters name="value">
+      <eBounds eClassifier="#//Entity"/>
+    </eTypeParameters>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EDataType" name="TransitionStack" instanceTypeName="java.util.Stack&lt;edu.pa22.GameStateTransition>"
+      serializable="false"/>
+  <eClassifiers xsi:type="ecore:EDataType" name="PositionMap" instanceClassName="java.util.Map"
+      serializable="false">
+    <eTypeParameters name="key">
+      <eBounds eClassifier="#//Position"/>
+    </eTypeParameters>
+    <eTypeParameters name="value">
+      <eBounds eClassifier="#//Position"/>
+    </eTypeParameters>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="PA22Helper">
+    <eOperations name="parseGameMap" eType="#//GameMap">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="&#xA;    if (mapText == null)&#xA;    {&#xA;      throw new IllegalArgumentException(&quot;Invalid map file.&quot;);&#xA;    }&#xA;&#xA;    final List&lt;String> lines = java.util.Arrays.asList(mapText.split(&quot;\\R&quot;));&#xA;    if (lines.isEmpty() || lines.get(0).trim().isEmpty())&#xA;    {&#xA;      throw new IllegalArgumentException(&quot;Invalid map file.&quot;);&#xA;    }&#xA;&#xA;    final int undoLimit;&#xA;    try&#xA;    {&#xA;      undoLimit = Integer.parseInt(lines.get(0).trim());&#xA;    }&#xA;    catch (NumberFormatException e)&#xA;    {&#xA;      throw new IllegalArgumentException(&quot;Failed to parse undo limit.&quot;, e);&#xA;    }&#xA;&#xA;    if (undoLimit &lt; -1)&#xA;    {&#xA;      throw new IllegalArgumentException(&quot;invalid undo limit&quot;);&#xA;    }&#xA;&#xA;    final List&lt;String> mapLines = lines.subList(1, lines.size());&#xA;    if (mapLines.isEmpty())&#xA;    {&#xA;      throw new IllegalArgumentException(&quot;Invalid map file.&quot;);&#xA;    }&#xA;&#xA;    int maxHeight = mapLines.size();&#xA;    int maxWidth = 0;&#xA;    for (String line : mapLines)&#xA;    {&#xA;      if (line.length() > maxWidth)&#xA;      {&#xA;        maxWidth = line.length();&#xA;      }&#xA;    }&#xA;&#xA;    final Map&lt;Position, Entity> entityMap = new HashMap&lt;Position, Entity>();&#xA;    final EList&lt;Position> destinations = new org.eclipse.emf.common.util.BasicEList&lt;Position>();&#xA;&#xA;    final java.util.Set&lt;Integer> players = new java.util.HashSet&lt;>();&#xA;    final java.util.Set&lt;Integer> referencedPlayers = new java.util.HashSet&lt;>();&#xA;    int boxCount = 0;&#xA;&#xA;    for (int y = 0; y &lt; mapLines.size(); y++)&#xA;    {&#xA;      String line = mapLines.get(y);&#xA;      for (int x = 0; x &lt; line.length(); x++)&#xA;      {&#xA;        char ch = line.charAt(x);&#xA;&#xA;        Position position = Pa22Factory.eINSTANCE.createPosition();&#xA;        position.setX(x);&#xA;        position.setY(y);&#xA;&#xA;        switch (ch)&#xA;        {&#xA;          case '#':&#xA;            entityMap.put(position, Pa22Factory.eINSTANCE.createWall());&#xA;            break;&#xA;          case '.':&#xA;            entityMap.put(position, Pa22Factory.eINSTANCE.createEmpty());&#xA;            break;&#xA;          case '@':&#xA;            destinations.add(position);&#xA;            entityMap.put(position, Pa22Factory.eINSTANCE.createEmpty());&#xA;            break;&#xA;          default:&#xA;            if (ch >= 'A' &amp;&amp; ch &lt;= 'Z')&#xA;            {&#xA;              int playerId = ch - 'A';&#xA;              if (!players.add(playerId))&#xA;              {&#xA;                throw new IllegalArgumentException(&quot;duplicate players detected in the map&quot;);&#xA;              }&#xA;&#xA;              Player player = Pa22Factory.eINSTANCE.createPlayer();&#xA;              player.setId(playerId);&#xA;              entityMap.put(position, player);&#xA;            }&#xA;            else if (ch >= 'a' &amp;&amp; ch &lt;= 'z')&#xA;            {&#xA;              int playerId = Character.toUpperCase(ch) - 'A';&#xA;              referencedPlayers.add(playerId);&#xA;              boxCount++;&#xA;&#xA;              Box box = Pa22Factory.eINSTANCE.createBox();&#xA;              box.setPlayerId(playerId);&#xA;              entityMap.put(position, box);&#xA;            }&#xA;            break;&#xA;        }&#xA;      }&#xA;    }&#xA;&#xA;    if (players.isEmpty())&#xA;    {&#xA;      throw new IllegalArgumentException(&quot;no player&quot;);&#xA;    }&#xA;&#xA;    if (destinations.size() != boxCount)&#xA;    {&#xA;      throw new IllegalArgumentException(&quot;mismatch destinations&quot;);&#xA;    }&#xA;&#xA;    if (!referencedPlayers.equals(players))&#xA;    {&#xA;      throw new IllegalArgumentException(&quot;unmatched players&quot;);&#xA;    }&#xA;&#xA;    GameMap gameMap = Pa22Factory.eINSTANCE.createGameMap();&#xA;    gameMap.setMaxWidth(maxWidth);&#xA;    gameMap.setMaxHeight(maxHeight);&#xA;    gameMap.setUndoLimit(undoLimit);&#xA;    gameMap.getDestinations().addAll(destinations);&#xA;    gameMap.setMap(entityMap);&#xA;    return gameMap;&#xA; "/>
+      </eAnnotations>
+      <eParameters name="mapText" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eOperations>
+    <eOperations name="createGameMap1" eType="#//GameMap">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="GameMap gameMap = Pa22Factory.eINSTANCE.createGameMap();&#xA;        gameMap.setMaxWidth(maxWidth);&#xA;        gameMap.setMaxHeight(maxHeight);&#xA;        gameMap.setUndoLimit(undoLimit);&#xA;        &#xA;        if (destinations != null) {&#xA;            gameMap.getDestinations().addAll(destinations);&#xA;        }&#xA;        &#xA;        // Initialize transient attribute map&#xA;        gameMap.setMap(new HashMap&lt;>());&#xA;        &#xA;        return gameMap;"/>
+      </eAnnotations>
+      <eParameters name="maxWidth" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+      <eParameters name="maxHeight" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+      <eParameters name="destinations" upperBound="-1" eType="#//Position"/>
+      <eParameters name="undoLimit" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    </eOperations>
+    <eOperations name="createGameMap2" eType="#//GameMap">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="GameMap gameMap = Pa22Factory.eINSTANCE.createGameMap();&#xA;        &#xA;        // EMF interface calls must use getX() and getY()&#xA;        int maxWidth = map.keySet().stream().mapToInt(Position::getX).max().orElse(0) + 1;&#xA;        int maxHeight = map.keySet().stream().mapToInt(Position::getY).max().orElse(0) + 1;&#xA;        &#xA;        gameMap.setMaxWidth(maxWidth);&#xA;        gameMap.setMaxHeight(maxHeight);&#xA;        gameMap.setUndoLimit(undoLimit);&#xA;        &#xA;        if (destinations != null) {&#xA;            gameMap.getDestinations().addAll(destinations);&#xA;        }&#xA;        &#xA;        // Set immutable Map&#xA;        gameMap.setMap(Collections.unmodifiableMap(map));&#xA;        &#xA;        return gameMap;"/>
+      </eAnnotations>
+      <eParameters name="destinations" upperBound="-1" eType="#//Position"/>
+      <eParameters name="undoLimit" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+      <eParameters name="map">
+        <eGenericType eClassifier="#//EntityMap">
+          <eTypeArguments eClassifier="#//Position"/>
+          <eTypeArguments eClassifier="#//Entity"/>
+        </eGenericType>
+      </eParameters>
+    </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="InputEngine" abstract="true" interface="true">
+    <eOperations name="fetchAction" eType="#//Action">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+    </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SokobanGame" abstract="true" interface="true">
+    <eOperations name="run">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+    </eOperations>
+  </eClassifiers>
+</ecore:EPackage>

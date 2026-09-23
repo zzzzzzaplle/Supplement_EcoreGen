@@ -1,0 +1,61 @@
+import java.util.ArrayList;
+import java.util.List;
+
+public class Company {
+    private String name;
+    private List<Department> departments;
+    private List<Employee> employees;
+
+    public Company() {
+        this.departments = new ArrayList<>();
+        this.employees = new ArrayList<>();
+    }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public List<Department> getDepartments() { return departments; }
+    public void setDepartments(List<Department> departments) { this.departments = departments; }
+    public void addDepartment(Department department) { this.departments.add(department); }
+    public void removeDepartment(Department department) { this.departments.remove(department); }
+    public List<Employee> getEmployees() { return employees; }
+    public void setEmployees(List<Employee> employees) { this.employees = employees; }
+
+    public double calculateTotalEmployeeSalary() {
+        double total = 0;
+        for (Employee e : employees) {
+            if (e instanceof Worker) {
+                Worker w = (Worker) e;
+                total += (w.getWeeklyWorkingHour() * w.getHourlyRates());
+                if (w instanceof ShiftWorker) {
+                    total += ((ShiftWorker) w).getHolidayPremium();
+                }
+            } else if (e instanceof SalesPeople) {
+                SalesPeople s = (SalesPeople) e;
+                total += (s.getSalary() + (s.getAmountOfSales() * s.getCommissionPercentage()));
+            } else if (e instanceof Manager) {
+                total += ((Manager) e).getSalary();
+            }
+        }
+        return Math.round(total * 100.0) / 100.0;
+    }
+
+    public double calculateTotalSalesPeopleCommission() {
+        double total = 0;
+        for (Employee e : employees) {
+            if (e instanceof SalesPeople) {
+                total += ((SalesPeople) e).getTotalCommission();
+            }
+        }
+        return Math.round(total * 100.0) / 100.0;
+    }
+
+    public double calculateTotalShiftWorkerHolidayPremiums() {
+        double total = 0;
+        for (Employee e : employees) {
+            if (e instanceof ShiftWorker) {
+                total += ((ShiftWorker) e).getHolidayPremium();
+            }
+        }
+        return Math.round(total * 100.0) / 100.0;
+    }
+}

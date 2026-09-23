@@ -1,0 +1,29 @@
+import java.util.Objects;
+
+public class GameBoardView {
+
+    private final GameBoard gameBoard;
+
+    public GameBoardView() {
+        this.gameBoard = null;
+    }
+
+    public GameBoardView(final GameBoard gameBoard) {
+        this.gameBoard = Objects.requireNonNull(gameBoard);
+    }
+
+    public GameBoard getGameBoard() {
+        return gameBoard;
+    }
+
+    public void output(final boolean useUnicodeChars) {
+        for (int r = 0; r < gameBoard.getNumRows(); ++r) {
+            for (int c = 0; c < gameBoard.getNumCols(); ++c) {
+                final Cell cell = gameBoard.getCell(r, c);
+                final char ch = useUnicodeChars ? cell.toUnicodeChar() : cell.toASCIIChar();
+                System.out.print(ch);
+            }
+            System.out.println();
+        }
+    }
+}

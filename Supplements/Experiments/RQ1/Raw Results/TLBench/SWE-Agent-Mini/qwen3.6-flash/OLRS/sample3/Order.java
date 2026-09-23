@@ -1,0 +1,126 @@
+import java.util.ArrayList;
+import java.util.List;
+
+public class Order {
+    private OrderStatus status;
+    private List<ItemLine> itemLines;
+
+    public Order() {
+        this.itemLines = new ArrayList<>();
+    }
+
+    public boolean addItemLine(ItemLine itemLine) {
+        // Preconditions: The order must be in Pending status
+        if (this.status != OrderStatus.PENDING) {
+            return false;
+        }
+
+        LibraryItem libraryItem = itemLine.getLibraryItem();
+
+        // The library item must be available (not Hold or Loan)
+        if (libraryItem.getStatus() != LibraryItemStatus.AVAILABLE) {
+            return false;
+        }
+
+        // Ensure no duplicate item line (same library item) exists in the order
+        for (ItemLine existingItemLine : this.itemLines) {
+            if (existingItemLine.getLibraryItem() == libraryItem) {
+                return false;
+            }
+        }
+
+        // Modify the library item's status from available to hold only if:
+        // - it's a print format book item or disc digital item
+        // Otherwise, keep the status as Available
+        if (libraryItem instanceof BookItem) {
+            BookItem bookItem = (BookItem) libraryItem;
+            if (bookItem.getType() == BookItemType.PRINT_FORMAT) {
+                libraryItem.setStatus(LibraryItemStatus.HOLD);
+            }
+        } else if (libraryItem instanceof DigitalItem) {
+            DigitalItem digitalItem = (DigitalItem) libraryItem;
+            if (digitalItem.getOption() == DigitalItemOption.DISC) {
+                libraryItem.setStatus(LibraryItemStatus.HOLD);
+            }
+        }
+
+        this.itemLines.add(itemLine);
+        return true;
+    }
+
+    public int removeItemLine(ItemLine itemLine) {
+        // Removed item line from an existing order in Pending status
+        if (this.status != OrderStatus.PENDING) {
+            return -1;
+        }
+
+        LibraryItem libraryItem = itemLine.getLibraryItem();
+
+        // Reset the library item's status to available only if it was previously Hold
+        // (for print/disc items)
+        if (libraryItem.getStatus() == LibraryItemStatus.HOLD) {
+            libraryItem.setStatus(LibraryItemStatus.AVAILABLE);
+        }
+
+        this.itemLines.remove(itemLine);
+        return this.itemLines.size();
+    }
+
+    public void handleOrder() {
+        // Update Order Status to "completed"
+        this.status = OrderStatus.COMPLETED;
+
+        // Modify the library item's status from hold to loan only if:
+        // the library item belongs to a print format book item or disc digital item
+        for (ItemLine itemLine : this.itemLines) {
+            LibraryItem libraryItem = itemLine.getLibraryItem();
+            if (libraryItem instanceof BookItem) {
+                BookItem bookItem = (BookItem) libraryItem;
+                if (bookItem.getType() == BookItemType.PRINT_FORMAT) {
+                    libraryItem.setStatus(LibraryItemStatus.LOAN);
+                }
+            } else if (libraryItem instanceof DigitalItem) {
+                DigitalItem digitalItem = (DigitalItem) libraryItem;
+                if (digitalItem.getOption() == DigitalItemOption.DISC) {
+                    libraryItem.setStatus(LibraryItemStatus.LOAN);
+                }
+            }
+        }
+    }
+
+    public int countPrintBookItemIfCompleted() {
+        // Count the total number of print-format book items in a given order
+        // only if the order status is completed
+        if (this.status != OrderStatus.COMPLETED) {
+            return 0;
+        }
+
+        int count = 0;
+        for (ItemLine itemLine : this.itemLines) {
+            LibraryItem libraryItem = itemLine.getLibraryItem();
+            if (libraryItem instanceof BookItem) {
+                BookItem bookItem = (BookItem) libraryItem;
+                if (bookItem.getType() == BookItemType.PRINT_FORMAT) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    public OrderStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(OrderStatus status) {
+        this.status = status;
+    }
+
+    public List<ItemLine> getItemLines() {
+        return itemLines;
+    }
+
+    public void setItemLines(List<ItemLine> itemLines) {
+        this.itemLines = itemLines;
+    }
+}

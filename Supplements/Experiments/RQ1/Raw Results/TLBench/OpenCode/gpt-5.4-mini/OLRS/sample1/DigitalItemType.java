@@ -1,0 +1,4 @@
+enum DigitalItemType {
+    AUDIO,
+    VIDEO
+}

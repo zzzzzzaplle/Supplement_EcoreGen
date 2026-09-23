@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="library" nsURI="http://www.ustb.edu.cn/library" nsPrefix="library">
+  <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+    <details key="requirement" value="System Requirements – Library Lending System (Simplified)&#xA;&#xA;The system manages book inventory, member records, and loan transactions for a small library. Each book stores title, author, and available copy count. Each member has a name, a unique ID, and a list of active loans. Each loan links one book to one member, records the borrow date, a due date (14 days later), and an optional return date (null while active).&#xA;&#xA;Core operations with precondition checks:&#xA;&#xA;Borrow a book – Succeeds only if (1) the book has at least one copy in stock, (2) the member has fewer than 5 active loans, and (3) the member does not already have an active loan for that same book. If all checks pass, a new loan is created, stock is decreased by one, and the operation returns true; otherwise false.&#xA;&#xA;Return a book – Locates the active loan (return date is null) for that member and book. If found, it sets the return date to today, increases stock by one, and automatically triggers fine calculation. Returns false if no matching active loan exists.&#xA;&#xA;Fine calculation – Computes the overdue fee based on the difference between the actual return date (or today if still outstanding) and the due date, at a fixed rate of $0.50 per day. Only positive differences incur a charge; result is a double.&#xA;&#xA;Extend due date – Allowed only if (1) the loan is not yet returned, (2) the loan is not already overdue, and (3) the loan has not been extended before (maximum one extension per loan). If permitted, the due date is increased by the requested number of days and true is returned; otherwise false.&#xA;&#xA;Supporting query methods – Each loan can report whether it has been returned or is overdue. Members can query their current borrowed count and whether they are eligible to borrow more (respecting the 5‑item limit and any block due to excessive overdue items, e.g., more than 30 days overdue).&#xA;&#xA;Additional rules – Stock adjustments are atomic. Members with a loan overdue beyond 30 days are automatically blocked from further borrowing until the item is returned (enforced via the eligibility check). All operations provide clear success/failure feedback and ensure consistent enforcement of library policies."/>
+  </eAnnotations>
+  <eClassifiers xsi:type="ecore:EClass" name="Member">
+    <eOperations name="getBorrowedCount">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="true"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Summary: Returns the number of active (not yet returned) loans for this member.&#xA;Algorithm:&#xA;  count = 0&#xA;  for each loan in loans:&#xA;    if loan.isReturned() == false then count = count + 1&#xA;  return count&#xA;Related Features: loans list; isReturned() method&#xA;Related Classes: Loan&#xA;Input: None (operates on the current Member instance)&#xA;Output: int - number of active loans, non-negative&#xA;Pre-condition: None&#xA;Post-condition: None (read-only operation)"/>
+        <details key="body" value="// TODO: Please generate a body of this unimplemented method based on the docstring&#xD;&#xA;// TODO: Replace the current body with the generated body &#xD;&#xA;// TODO: Ensure that you mark it @generated NOT after code completion&#xD;&#xA;throw new UnsupportedOperationException();&#xD;&#xA;"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    </eOperations>
+    <eOperations name="canBorrow">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="true"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Summary: Checks whether the member is eligible to borrow more books, respecting the 5-item limit and any block due to excessive overdue items (more than 30 days overdue).&#xA;Algorithm:&#xA;  if getBorrowedCount() >= 5 then return false&#xA;  for each loan in loans:&#xA;    if loan.isReturned() == false and loan.isOverdue() == true:&#xA;      daysOverdue = daysBetween(today(), loan.dueDate)&#xA;      if daysOverdue > 30 then return false&#xA;  return true&#xA;Related Features: loans list; getBorrowedCount(), isOverdue() methods&#xA;Related Classes: Loan, EDate&#xA;Input: None (operates on the current Member instance)&#xA;Output: boolean - true if eligible to borrow, false otherwise&#xA;Pre-condition: None&#xA;Post-condition: None (read-only operation)"/>
+        <details key="body" value="// TODO: Please generate a body of this unimplemented method based on the docstring&#xD;&#xA;// TODO: Replace the current body with the generated body &#xD;&#xA;// TODO: Ensure that you mark it @generated NOT after code completion&#xD;&#xA;throw new UnsupportedOperationException();&#xD;&#xA;"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    </eOperations>
+    <eOperations name="borrowBook">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="true"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Summary: Attempts to borrow a book for this member. Succeeds only if the book has at least one copy in stock, the member has fewer than 5 active loans, and the member does not already have an active loan for that same book. If successful, creates a new loan, decreases stock by one, and returns true; otherwise returns false.&#xA;Algorithm:&#xA;  if book.checkAvailability() == false then return false&#xA;  if getBorrowedCount() >= 5 then return false&#xA;  for each loan in loans:&#xA;    if loan.book == book and loan.isReturned() == false then return false&#xA;  newLoan = new Loan()&#xA;  newLoan.book = book&#xA;  newLoan.member = this&#xA;  newLoan.borrowDate = today()&#xA;  newLoan.dueDate = today().addDays(14)&#xA;  newLoan.extensionCount = 0&#xA;  newLoan.returnedDate = null&#xA;  loans.add(newLoan)&#xA;  book.stock = book.stock - 1&#xA;  return true&#xA;Related Features: loans list, borrowDate, dueDate, extensionCount, returnedDate attributes; canBorrow(), getBorrowedCount() methods&#xA;Related Classes: Book, Loan, EDate&#xA;Input: book : Book - the book to borrow&#xA;Output: boolean - true if borrow succeeded, false otherwise&#xA;Pre-condition: book != null&#xA;Post-condition: If successful, a new Loan is created and added to loans, book.stock is decremented by 1, and true is returned; otherwise no change and false is returned."/>
+        <details key="body" value="// TODO: Please generate a body of this unimplemented method based on the docstring&#xD;&#xA;// TODO: Replace the current body with the generated body &#xD;&#xA;// TODO: Ensure that you mark it @generated NOT after code completion&#xD;&#xA;throw new UnsupportedOperationException();&#xD;&#xA;"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+      <eParameters name="book" eType="//Book"/>
+    </eOperations>
+    <eOperations name="returnBook">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="true"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Summary: Returns a borrowed book. Locates the active loan (return date is null) for this member and the given book. If found, sets the return date to today, increases stock by one, and automatically triggers fine calculation. Returns false if no matching active loan exists.&#xA;Algorithm:&#xA;  for each loan in loans:&#xA;    if loan.book == book and loan.isReturned() == false:&#xA;      loan.returnedDate = today()&#xA;      book.stock = book.stock + 1&#xA;      loan.calculateFine()  // fine is calculated but not explicitly returned here&#xA;      return true&#xA;  return false&#xA;Related Features: loans list, returnedDate attribute; isReturned(), calculateFine() methods&#xA;Related Classes: Book, Loan, EDate&#xA;Input: book : Book - the book to return&#xA;Output: boolean - true if return succeeded, false otherwise&#xA;Pre-condition: book != null&#xA;Post-condition: If successful, the matching loan's returnedDate is set to today, book.stock is incremented by 1, and true is returned; otherwise no change and false is returned."/>
+        <details key="body" value="// TODO: Please generate a body of this unimplemented method based on the docstring&#xD;&#xA;// TODO: Replace the current body with the generated body &#xD;&#xA;// TODO: Ensure that you mark it @generated NOT after code completion&#xD;&#xA;throw new UnsupportedOperationException();&#xD;&#xA;"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+      <eParameters name="book" eType="//Book"/>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name">
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="memberId">
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="loans" upperBound="-1" eType="//Loan" eOpposite="//Loan/member"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Book">
+    <eOperations name="getInfo">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="true"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Summary: Returns a formatted string containing the book's title, author, and current available stock.&#xA;Algorithm: Return a String formatted as &quot;Title: [title], Author: [author], Available Copies: [stock]&quot;&#xA;Related Features: title, author, stock attributes&#xA;Related Classes: None&#xA;Input: None (operates on the current Book instance)&#xA;Output: String - formatted book information&#xA;Pre-condition: None&#xA;Post-condition: None (read-only operation)"/>
+        <details key="body" value="// TODO: Please generate a body of this unimplemented method based on the docstring&#xD;&#xA;// TODO: Replace the current body with the generated body &#xD;&#xA;// TODO: Ensure that you mark it @generated NOT after code completion&#xD;&#xA;throw new UnsupportedOperationException();&#xD;&#xA;"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eOperations>
+    <eOperations name="checkAvailability">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="true"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Summary: Checks if the book has at least one copy available in stock for borrowing.&#xA;Algorithm: Return true if stock > 0, otherwise return false.&#xA;Related Features: stock attribute&#xA;Related Classes: None&#xA;Input: None (operates on the current Book instance)&#xA;Output: boolean - true if stock > 0, false otherwise&#xA;Pre-condition: None&#xA;Post-condition: None (read-only operation)"/>
+        <details key="body" value="// TODO: Please generate a body of this unimplemented method based on the docstring&#xD;&#xA;// TODO: Replace the current body with the generated body &#xD;&#xA;// TODO: Ensure that you mark it @generated NOT after code completion&#xD;&#xA;throw new UnsupportedOperationException();&#xD;&#xA;"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="title">
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author">
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="stock">
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="involves" upperBound="-1" eType="//Loan"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Loan">
+    <eOperations name="calculateFine">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="true"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Summary: Computes the overdue fee based on the difference between the actual return date (or today if still outstanding) and the due date, at a fixed rate of $0.50 per day. Only positive differences incur a charge.&#xA;Algorithm: &#xA;  if returnedDate != null then&#xA;    daysOverdue = daysBetween(returnedDate, dueDate)&#xA;  else&#xA;    daysOverdue = daysBetween(today(), dueDate)&#xA;  if daysOverdue > 0 then&#xA;    return daysOverdue * 0.50&#xA;  else&#xA;    return 0.0&#xA;Related Features: returnedDate, dueDate attributes&#xA;Related Classes: None&#xA;Input: None (operates on the current Loan instance)&#xA;Output: double - the overdue fine amount in dollars, non-negative&#xA;Pre-condition: None&#xA;Post-condition: None (read-only operation)"/>
+        <details key="body" value="// TODO: Please generate a body of this unimplemented method based on the docstring&#xD;&#xA;// TODO: Replace the current body with the generated body &#xD;&#xA;// TODO: Ensure that you mark it @generated NOT after code completion&#xD;&#xA;throw new UnsupportedOperationException();&#xD;&#xA;"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    </eOperations>
+    <eOperations name="extendDueDate">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="true"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Summary: Extends the due date by the requested number of days if the loan is not returned, not overdue, and has not been extended before (maximum one extension per loan).&#xA;Algorithm:&#xA;  if isReturned() == true then return false&#xA;  if isOverdue() == true then return false&#xA;  if extensionCount >= 1 then return false&#xA;  dueDate = dueDate.addDays(extraDays)&#xA;  extensionCount = extensionCount + 1&#xA;  return true&#xA;Related Features: dueDate, extensionCount attributes; isReturned(), isOverdue() methods&#xA;Related Classes: None&#xA;Input: extraDays : int - number of days to extend the due date, must be positive&#xA;Output: boolean - true if extension was successful, false otherwise&#xA;Pre-condition: extraDays > 0&#xA;Post-condition: If successful, dueDate is increased by extraDays, extensionCount is incremented by 1, and true is returned; otherwise no change and false is returned."/>
+        <details key="body" value="// TODO: Please generate a body of this unimplemented method based on the docstring&#xD;&#xA;// TODO: Replace the current body with the generated body &#xD;&#xA;// TODO: Ensure that you mark it @generated NOT after code completion&#xD;&#xA;throw new UnsupportedOperationException();&#xD;&#xA;"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+      <eParameters name="extraDays">
+        <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+      </eParameters>
+    </eOperations>
+    <eOperations name="isOverdue">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="true"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Summary: Checks whether the loan is currently overdue (past the due date and not yet returned).&#xA;Algorithm:&#xA;  if isReturned() == true then return false&#xA;  return today() > dueDate&#xA;Related Features: dueDate attribute; isReturned() method&#xA;Related Classes: None&#xA;Input: None (operates on the current Loan instance)&#xA;Output: boolean - true if overdue, false otherwise&#xA;Pre-condition: None&#xA;Post-condition: None (read-only operation)"/>
+        <details key="body" value="// TODO: Please generate a body of this unimplemented method based on the docstring&#xD;&#xA;// TODO: Replace the current body with the generated body &#xD;&#xA;// TODO: Ensure that you mark it @generated NOT after code completion&#xD;&#xA;throw new UnsupportedOperationException();&#xD;&#xA;"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    </eOperations>
+    <eOperations name="isReturned">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="true"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Summary: Checks whether the loan has been returned (returnedDate is not null).&#xA;Algorithm: Return (returnedDate != null)&#xA;Related Features: returnedDate attribute&#xA;Related Classes: None&#xA;Input: None (operates on the current Loan instance)&#xA;Output: boolean - true if returned, false otherwise&#xA;Pre-condition: None&#xA;Post-condition: None (read-only operation)"/>
+        <details key="body" value="// TODO: Please generate a body of this unimplemented method based on the docstring&#xD;&#xA;// TODO: Replace the current body with the generated body &#xD;&#xA;// TODO: Ensure that you mark it @generated NOT after code completion&#xD;&#xA;throw new UnsupportedOperationException();&#xD;&#xA;"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="borrowDate">
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dueDate">
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="returnedDate">
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="extensionCount">
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="book" eType="//Book"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="member" eType="//Member" eOpposite="//Member/loans"/>
+  </eClassifiers>
+</ecore:EPackage>

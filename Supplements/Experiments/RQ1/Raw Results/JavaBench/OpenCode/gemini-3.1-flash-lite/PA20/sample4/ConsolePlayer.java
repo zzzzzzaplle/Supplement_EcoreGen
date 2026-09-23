@@ -1,0 +1,5 @@
+public class ConsolePlayer extends Player {
+    public ConsolePlayer() {}
+
+    public Move nextMove(Game game, Move[] availableMoves) { return null; }
+}

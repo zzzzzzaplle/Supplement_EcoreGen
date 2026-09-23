@@ -1,0 +1,44 @@
+import java.util.ArrayList;
+import java.util.List;
+
+public class Department {
+    private String ID;
+    private String name;
+    private String email;
+    private List<Employee> employees = new ArrayList<>();
+    private List<Project> projects = new ArrayList<>();
+
+    public Department() {}
+
+    public double calculateAverageBudget() {
+        if (projects.isEmpty()) return 0.0;
+        double sum = 0.0;
+        for (Project p : projects) {
+            sum += p.getBudget();
+        }
+        return sum / projects.size();
+    }
+
+    public List<FundingGroupType> getFundingGroupTypeCommunityProjects() {
+        List<FundingGroupType> types = new ArrayList<>();
+        for (Project p : projects) {
+            if (p instanceof CommunityProject) {
+                types.add(((CommunityProject) p).getFundingGroup().getType());
+            }
+        }
+        return types;
+    }
+
+    public String getID() { return ID; }
+    public void setID(String ID) { this.ID = ID; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    public List<Employee> getEmployees() { return employees; }
+    public void setEmployees(List<Employee> employees) { this.employees = employees; }
+    public void addEmployee(Employee employee) { this.employees.add(employee); }
+    public List<Project> getProjects() { return projects; }
+    public void setProjects(List<Project> projects) { this.projects = projects; }
+    public void addProject(Project project) { this.projects.add(project); }
+}

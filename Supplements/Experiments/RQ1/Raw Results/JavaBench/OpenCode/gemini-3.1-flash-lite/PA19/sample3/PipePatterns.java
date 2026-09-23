@@ -1,0 +1,20 @@
+public class PipePatterns {
+    public static class Filled {
+        public static final char HORIZONTAL = '─';
+        public static final char VERTICAL = '│';
+        public static final char TOP_LEFT = '┌';
+        public static final char TOP_RIGHT = '┐';
+        public static final char BOTTOM_LEFT = '└';
+        public static final char BOTTOM_RIGHT = '┘';
+        public static final char CROSS = '┼';
+    }
+    public static class Unfilled {
+        public static final char HORIZONTAL = '-';
+        public static final char VERTICAL = '|';
+        public static final char TOP_LEFT = 'L';
+        public static final char TOP_RIGHT = '7';
+        public static final char BOTTOM_LEFT = 'Γ';
+        public static final char BOTTOM_RIGHT = 'J';
+        public static final char CROSS = '+';
+    }
+}

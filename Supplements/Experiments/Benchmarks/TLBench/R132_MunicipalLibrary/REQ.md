@@ -1,0 +1,7 @@
+// ==version1==
+```
+We want to automate the management of a small municipal library. The library has a name and manages a collection of documents and a set of registered members. Members have a first name and a surname. Documents are uniquely identified by their title. Every document has a title. A volume is a kind of document and also has an author. A book is a kind of volume and also has a bookId that identifies the physical or catalogued copy. A dictionary is a kind of volume and also has a dictionaryId that identifies the dictionary entry in the library catalog. A comic is also a kind of volume and has a recipient name. A journal is a kind of document and has a publication date. Only books can be borrowed.
+
+A registered member can borrow or return a book, and the system must always be able to list the titles currently borrowed by that member. A member can hold at most three borrowed books at the same time. When a borrowing succeeds, the system creates a borrow record containing the borrowing date, the borrowed book, and a return due date exactly seven days later. A borrowed book can be extended on request when the request is made before the current due date. A return is accepted only when the member currently holds that book and the book is not overdue. The system records dates in the format "yyyy-MM-dd".
+```
+// ==end==

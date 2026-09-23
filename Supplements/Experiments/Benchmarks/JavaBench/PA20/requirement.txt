@@ -1,0 +1,39 @@
+Overview
+This project implements a customized board game called JesonMor. It is a turn-based, two-player game played on an odd-sized square grid board, such as 9x9. The game has two piece types: Knight and Archer. Each piece has unique movement and capture behavior inspired by Western chess and Chinese chess. Players take turns moving pieces and gain score based on the Manhattan distance of each successful move. The game uses a rule-based validation pipeline to ensure that moves are legal. During the first N moves, capturing is prohibited. The system provides the core game loop, piece movement logic, rule validation, board display, and player input handling.
+Functional Requirements
+Game Control and Loop
+The game is initialized from a Configuration containing the board size, players, initial piece placement, the central square, and the number of protected moves. The board size must be odd, and the central square is located at size/2, size/2.
+The game proceeds in turns. On each turn, the current Player receives the list of legal moves, chooses one move, and the game attempts to execute it. If the move is valid, the piece is moved, the score is updated, and the console output is refreshed.
+When a move is executed, the Piece at the source square is transferred to the destination square, and the source square becomes empty.
+After a successful move, the current Player's score increases by the Manhattan distance between source and destination. Invalid attempts must not change the board or scores.
+After each successful move, the game checks whether a Player has won. During the protection phase, no winner can be declared. Protection is active while game.numMoves is strictly less than numMovesProtection.
+After protection ends, a Player wins if a Knight leaves the central square, or if only one Player's pieces remain on the board.
+If a Player has no legal moves on their turn, the game ends. The Player with the higher score wins. If scores are tied, the current Player wins.
+Piece Movement Logic
+Knight moves in an L shape: two squares in one direction and one square in the perpendicular direction. Unlike Western chess, the Knight can be blocked by an adjacent piece in its primary direction of movement, similar to the Horse in Chinese chess.
+If the Knight moves two squares horizontally and one vertically, the blocking square is halfway along the horizontal direction. If it moves one square horizontally and two vertically, the blocking square is halfway along the vertical direction. The move is invalid if that blocking square is occupied.
+Archer moves any distance orthogonally and cannot jump freely. For a non-capturing move, every square between source and destination must be empty. For a capturing move, there must be exactly one piece between source and destination, acting as the screen or mount, similar to the Cannon in Chinese chess.
+Each Piece type produces its own final legal move list by generating candidate moves from its current position and applying all relevant global and piece-specific validation rules.
+Global rules include VacantRule, NilMoveRule, OutOfBoundaryRule, OccupiedRule, and FirstNMovesProtectionRule. These ensure that the source is occupied, source and destination differ, both positions are within board limits, the destination does not contain a friendly piece, and captures are blocked during the protection phase.
+Knight applies only KnightMoveRule and KnightBlockRule. Archer applies only ArcherMoveRule. Piece types do not validate rules belonging to other piece types.
+A Player's legal move list is formed by scanning all pieces belonging to that Player and combining the legal moves produced by those pieces.
+Knight displays as 'K'. Archer displays as 'A'.
+Rule Validation System
+Global validation ensures that the source is not empty, the move is not from a square to itself, both coordinates are inside the board, and the destination does not contain a friendly piece.
+During the protection phase, captures are not allowed. The protection phase also prevents winner evaluation.
+Knight-specific validation checks the L-shaped movement pattern and blocking rule.
+Archer-specific validation checks orthogonal movement, clear paths for normal movement, and exactly one intervening screen piece for captures.
+Board Display and Coordinates
+The board uses coordinates where columns are labeled with lowercase letters starting from a, and rows are labeled with numbers starting from 1. Both start from the bottom-left corner.
+User input uses the form "source->destination", such as "a1->b2".
+Empty squares display as '.'. The central square displays as 'x' when empty. Pieces display using their Color and label, such as a red Knight shown as a red 'K'.
+Internally, the board is stored as board[x][y], where x is the column and y is the row, both zero-based from the bottom-left corner. Column a maps to x=0, column b maps to x=1, and so on. Row 1 maps to y=0, row 2 maps to y=1, and so on.
+Read access to board pieces should go through the provided Game read behavior. Board updates inside Game subclasses may directly modify the two-dimensional board array. No separate piece-setting helper is expected. Direct board mutation is allowed for write operations in Game subclasses.
+ConsolePlayer Input Contract
+ConsolePlayer prompts the user to choose from the already-validated legal moves.
+The input format is "source->destination". Each side is parsed independently. Column letters map to zero-based x coordinates, and row numbers map to zero-based y coordinates.
+After parsing, the selected Move must exactly match one of the currently legal moves. If the format is invalid, the coordinates are out of bounds, the source has no piece, or the move is not legal, an error is printed and ConsolePlayer prompts again until a valid move is entered.
+External Knowledge and Tools
+Some infrastructure classes are already implemented and are not part of the Ecore model.
+MoveRecord is an independent data class that records a Player and a Move. It is available as a utility type, but it is not required by the current JesonMor core loop.
+InvalidConfigurationError should be used when initialization parameters are invalid.

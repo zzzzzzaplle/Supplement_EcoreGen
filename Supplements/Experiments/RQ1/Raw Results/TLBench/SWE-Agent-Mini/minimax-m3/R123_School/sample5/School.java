@@ -1,0 +1,97 @@
+import java.util.ArrayList;
+import java.util.List;
+
+public class School {
+    private String name;
+    private List<Course> courses;
+    private List<Sector> sectors;
+
+    public School(String name) {
+        this.name = name;
+        this.courses = new ArrayList<>();
+        this.sectors = new ArrayList<>();
+    }
+
+    public School() {
+        this.name = "";
+        this.courses = new ArrayList<>();
+        this.sectors = new ArrayList<>();
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public List<Course> getCourses() {
+        return courses;
+    }
+
+    public void setCourses(List<Course> courses) {
+        this.courses = courses;
+    }
+
+    public List<Sector> getSectors() {
+        return sectors;
+    }
+
+    public void setSectors(List<Sector> sectors) {
+        this.sectors = sectors;
+    }
+
+    public boolean addCourse(String id) {
+        if (id == null) return false;
+        for (Course c : courses) {
+            if (c.getId() != null && c.getId().equals(id)) {
+                return false;
+            }
+        }
+        Course course = new Course(id);
+        courses.add(course);
+        return true;
+    }
+
+    public boolean assignCourseToSector(String courseId, String sectorId) {
+        if (courseId == null || sectorId == null) return false;
+        Course targetCourse = null;
+        for (Course c : courses) {
+            if (courseId.equals(c.getId())) {
+                targetCourse = c;
+                break;
+            }
+        }
+        if (targetCourse == null) return false;
+
+        Sector targetSector = null;
+        for (Sector s : sectors) {
+            if (sectorId.equals(s.getId())) {
+                targetSector = s;
+                break;
+            }
+        }
+        if (targetSector == null) return false;
+
+        Sector currentSector = targetCourse.getSector();
+        if (currentSector != null) {
+            currentSector.removeCourse(targetCourse);
+        }
+
+        targetSector.addCourse(targetCourse);
+        targetCourse.setSector(targetSector);
+        return true;
+    }
+
+    public Sector addSector(String id) {
+        for (Sector s : sectors) {
+            if (id != null && id.equals(s.getId())) {
+                return null;
+            }
+        }
+        Sector sector = new Sector(id);
+        sectors.add(sector);
+        return sector;
+    }
+}

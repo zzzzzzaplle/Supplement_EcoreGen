@@ -1,0 +1,61 @@
+1. Overall / Domain Description
+This is a console pipe-connection game. The board is a grid surrounded by outer walls. One source is placed inside the board and points inward; one sink is placed on the border and points outward. The player places pipes from a queue. After a delay, water begins to flow through the placed pipes.
+The cell grid uses zero-based internal array indices. Index 0 and the last row or column are occupied by the outer wall border. Therefore, the playable area starts at internal index 1 and spans [1..rows-2] by [1..cols-2].
+Player-facing coordinates intentionally align with these playable indices. Row 1 maps to internal row 1, and column 'A' maps to internal column 1. No row-minus-one or column-minus-one conversion is applied, except for converting column letters into internal column numbers.
+Directions include up, down, left, and right. Each direction supports movement by offset and comparison with its opposite direction. Pipe shapes define their connection directions. Termination type distinguishes source from sink.
+2. Functional Requirements
+Coordinate and Direction
+A coordinate stores the internal row and column used directly to access the cell grid. A cell stored at a grid position should carry the same row and column values as that position.
+Because the outer wall border occupies index 0, playable cells begin at index 1. This makes player input align directly with the playable internal area.
+Each direction represents one of the four cardinal directions and provides the information needed for movement and opposite-direction matching.
+Game
+The game supports pipe placement, skipping the current pipe, undoing the latest placement, advancing water flow, checking win and loss states, constructing a game from serialized input, and maintaining a step count.
+When placing a pipe, the player row is used directly. The column letter is converted so that 'A' becomes internal column 1, 'B' becomes 2, and so on. For example, row 1 with column 'A' targets the internal cell at [1][1].
+Skipping removes the current pipe from the front of the queue and increases the step count.
+Undo restores the most recently placed pipe to the front of the queue, clears that pipe from the board, and increases the step count. If there is no previous placement, undo fails without changing the board.
+Map
+Cells are stored in a two-dimensional grid indexed from [0..rows-1] and [0..cols-1]. The outermost rows and columns are walls. The playable area is [1..rows-2] by [1..cols-2].
+Pipe placement uses playable-area-aligned coordinates directly as internal array indices.
+A placement is rejected if the target position is outside the playable area, if the target cell is not fillable, or if the target cell already contains a pipe.
+Cell Family
+Map characters are parsed into concrete cell types.
+A fillable cell may contain a pipe or be empty. Empty fillable cells render as a dot.
+A termination cell represents either the source or the sink. It stores its pointing direction, its termination type, and whether it has been filled.
+A wall cell represents the board boundary and renders using the wall character.
+Termination Cell Rendering
+A termination cell renders as an arrow according to its pointing direction and filled state. Filled and unfilled arrow characters come from shared rendering constants.
+Both source and sink use their stored pointing direction directly. The direction is not reversed.
+Unknown directions should be treated as invalid state.
+Pipe
+A pipe has a shape and a filled state. The shape determines which directions the pipe connects to.
+Supported shapes include horizontal, vertical, four corner shapes, and cross.
+Pipe rendering depends on both shape and filled state. Rendering characters should come from shared constants rather than hardcoded glyphs.
+Short pipe codes include HZ, VT, TL, TR, BL, BR, and CR.
+Water Flow
+At the start of water flow, the source is marked as filled.
+Water expands from the source by distance using breadth-first-style traversal. Each round increases the reachable fill distance by one.
+Water can move between adjacent pipes only when their connection directions match each other. One pipe’s outgoing direction must correspond to the opposite direction of the neighboring pipe.
+Win and Loss Conditions
+The player wins when a connected path exists from the source to the sink.
+Path checking begins by moving once from the source in its pointing direction. From each pipe, traversal continues through that pipe’s connection directions. Pipes do not need to already be filled for the path to count. Reaching the sink means the game is won.
+The player loses when the previous water-flow update filled no new pipes. Loss is checked only after the initial delay has ended and water has started advancing.
+Pipe Queue
+The pipe queue stores upcoming pipes. The player interacts with the pipe at the front.
+When the front pipe is consumed, the queue is refilled up to a fixed maximum length using randomly generated pipe shapes.
+Undo places the restored pipe back at the front of the queue.
+Delay Bar
+The delay bar starts with an initial value and decreases once per round.
+While the value is still positive, water has not begun flowing. After the countdown passes zero, the corresponding positive distance indicates how far water should expand from the source.
+Cell Stack
+The placement history records successfully placed cells in order.
+Undo uses the most recent placement. The undo counter records the number of successful undo actions, not the current size of the placement history.
+3. External / Tool Classes
+Deserializer
+This provided class is responsible for turning map input into runtime game objects. It stores the input file path, validates that the file exists, and reports a missing file as an error.
+PipePatterns
+This provided utility-style class centralizes all map-rendering characters. It contains the wall character and grouped constants for filled and unfilled arrows and pipe shapes.
+Rendering logic should rely on these shared constants instead of hardcoded characters.
+StringUtils
+This provided utility-style class contains lightweight string helpers and should not be instantiated.
+Its padding behavior produces a string made by repeating a target character a requested number of times. It is mainly used for console or text formatting, such as spacing and alignment in map display.
+A repeat count of zero produces an empty string. A negative repeat count follows the standard Java string repetition behavior and raises an error.

@@ -1,0 +1,154 @@
+GameMap.java:
+   public GameMap(int maxWidth, int maxHeight, Set<Position> destinations, int undoLimit) {
+        this.maxWidth = maxWidth;
+        this.maxHeight = maxHeight;
+        this.destinations = Collections.unmodifiableSet(destinations);
+        this.undoLimit = undoLimit;
+        this.map = new HashMap<>();
+    }
+
+    private GameMap(Map<Position, Entity> map, Set<Position> destinations, int undoLimit) {
+        this.map = Collections.unmodifiableMap(map);
+        this.destinations = Collections.unmodifiableSet(destinations);
+        this.undoLimit = undoLimit;
+        this.maxWidth = map.keySet().stream().mapToInt(Position::x).max().orElse(0) + 1;
+        this.maxHeight = map.keySet().stream().mapToInt(Position::y).max().orElse(0) + 1;
+    }
+GameStateTransition.java:
+        public void add(Position from, Position to) {
+            final Position key = this.moves.entrySet().stream()
+                    .filter(e -> e.getValue().equals(from))
+                    .map(Map.Entry::getKey)
+                    .findFirst().orElse(from);
+            this.moves.put(key, to);
+        }
+        public Transition reverse() {
+            final Map<Position, Position> moves = this.moves.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+            return new Transition(moves);
+        }
+
+SokobanGameFactory.java:
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+/**
+ * Factory for creating Sokoban games
+ */
+public class SokobanGameFactory {
+
+    /**
+     * Create a TUI version of the Sokoban game.
+     *
+     * @param mapFile map file.
+     * @return The Sokoban game.
+     * @throws IOException if mapFile cannot be load
+     */
+    public static SokobanGame createTUIGame(String mapFile) throws IOException {
+        Path file;
+        if (!mapFile.endsWith(".map")) {
+            // treat as built-in maps
+            final URL resource = SokobanGameFactory.class.getClassLoader().getResource(mapFile + ".map");
+            if (resource == null) throw new RuntimeException("No such built-in map: " + mapFile);
+            try {
+                file = Path.of(resource.toURI());
+            } catch (URISyntaxException e) {
+                throw new RuntimeException("Error loading map:" + mapFile);
+            }
+        } else {
+            file = Path.of(mapFile);
+        }
+        final GameMap gameMap = loadGameMap(file);
+        return new TerminalSokobanGame(
+            new GameState(gameMap),
+            new TerminalInputEngine(System.in),
+            new TerminalRenderingEngine(System.out)
+        );
+    }
+    /**
+     * @param mapFile The file containing the game map.
+     * @return The parsed game map.
+     * @throws IOException When there is an issue loading the file.
+     */
+    public static GameMap loadGameMap(Path mapFile) throws IOException {
+        final String fileContent = Files.readString(mapFile);
+        return GameMap.parse(fileContent);
+    }
+}
+
+Sokoban.java:
+
+import java.io.IOException;
+/**
+ * The holder of the entry point of the game.
+ */
+public class Sokoban {
+
+    /**
+     * The entry point of the program.
+     *
+     * @param args The command line args.
+     */
+    public static void main(String[] args) {
+        if (args.length < 1) {
+            System.err.println("Map is not provided.");
+            System.exit(1);
+        }
+        final String mapFile = args[0];
+        try {
+            final SokobanGame game = SokobanGameFactory.createTUIGame(mapFile);
+            game.run();
+        } catch (IOException e) {
+            System.err.println("Failed to load game map: " + e);
+            System.exit(1);
+        }
+    }
+}
+
+
+NotImplementedException.java
+/**
+ * Throw to indicate that the feature is not implemented.
+ */
+public class NotImplementedException extends RuntimeException {
+}
+
+
+ShouldNotReachException.java
+/**
+ * Thrown when a branch should not be reached. Used to avoid compilation error.
+ */
+public class ShouldNotReachException extends RuntimeException {
+
+    /**
+     * Create a new should not reach exception.
+     */
+    public ShouldNotReachException() {
+        super("This branch should not be reached.");
+    }
+}
+
+
+StringResources.java
+@SuppressWarnings("MissingJavadoc")
+public class StringResources {
+
+    public static final String GAME_READY_MESSAGE = "Sokoban game is ready.";
+    public static final String INVALID_INPUT_MESSAGE = "Invalid Input.";
+
+
+    public static final String UNDO_QUOTA_TEMPLATE = "Undo Quota: %s";
+    public static final String UNDO_QUOTA_UNLIMITED = "Unlimited";
+    public static final String UNDO_QUOTA_RUN_OUT = "You have run out of your undo quota.";
+
+    public static final String PLAYER_NOT_FOUND = "Player not found.";
+
+    public static final String GAME_EXIT_MESSAGE = "Game exits.";
+    public static final String WIN_MESSAGE = "You win.";
+
+    public static final String EXIT_COMMAND_TEXT = "exit";
+}
+

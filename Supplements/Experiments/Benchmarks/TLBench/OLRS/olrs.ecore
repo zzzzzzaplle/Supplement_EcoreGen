@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="olrs" nsURI="http://www.example.org/olrs" nsPrefix="olrs">
+  <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+    <details key="requirement" value="Online Library System (OLS) provides easy access to customers to order different library items. A customer can place multiple orders. The status of an order can be pending or completed. Furthermore, each order is composed of multiple item lines. Each item line has a quantity. An item line is associated with a library item. The library item can be a book item or a digital item. Each library item has a status. The status can be available, hold, or loan. The book item can be of types - eBook format or print format. On the other side, the digital item can be an audio item or a video item. In addition, a digital item also has two options - downloadable and disc.&#xA;Functional requirement:&#xA;1. Add a new item line to order. Preconditions. The order must be in Pending status; the library item must be available (not Hold or Loan). Ensure no duplicate item line (same library item) exists in the order. And modify the library item's status from available to hold only if the library item is a print format book item or disc digital item. Otherwise, keep the status as Available. Return true if item line added, false if validation fails.&#xA;2. Remove an item line from an existing order in Pending status. If successful: Return the updated count of item lines in the order. Reset the library item's status to available only if it was previously Hold (for print/disc items). Otherwise, retain its original status. If failed (order is completed): Return -1.&#xA;3. Handle an existing order. First, update Order Status to &quot;completed&quot;. And then modify the library item's status from hold to loan only if the library item belongs to a print format book item or disc digital item.&#xA;4. Calculate the total downloads for a specific Audio digital item. Only consider orders with Completed status. Only count if the digital item's option is Downloadable (not Disc). Return total download count. If no download, return 0.&#xA;5. Count the total number of print-format book items in a given order only if the order status is completed. Return 0 if none."/>
+  </eAnnotations>
+  <eClassifiers xsi:type="ecore:EEnum" name="OrderStatus">
+    <eLiterals name="PENDING"/>
+    <eLiterals name="COMPLETED" value="1"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="LibraryItemStatus">
+    <eLiterals name="AVAILABLE"/>
+    <eLiterals name="HOLD" value="1"/>
+    <eLiterals name="LOAN" value="2"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="BookItemType">
+    <eLiterals name="EBOOK"/>
+    <eLiterals name="PRINT_FORMAT" value="1"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="DigitalItemOption">
+    <eLiterals name="DOWNLOADABLE"/>
+    <eLiterals name="DISC" value="1"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="DigitalItemType">
+    <eLiterals name="AUDIO"/>
+    <eLiterals name="VIDEO" value="1"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Order">
+    <eOperations name="addItemLine" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean">
+      <eParameters name="itemLine" lowerBound="1" eType="#//ItemLine"/>
+    </eOperations>
+    <eOperations name="countPrintBookItemIfCompleted" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eOperations name="removeItemLine" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt">
+      <eParameters name="itemLine" lowerBound="1" eType="#//ItemLine"/>
+    </eOperations>
+    <eOperations name="handleOrder"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="status" lowerBound="1"
+        eType="#//OrderStatus"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="itemLines" upperBound="-1"
+        eType="#//ItemLine" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ItemLine">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="quantity" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="libraryItem" lowerBound="1"
+        eType="#//LibraryItem"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="LibraryItem" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="status" lowerBound="1"
+        eType="#//LibraryItemStatus"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="BookItem" eSuperTypes="#//LibraryItem">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" lowerBound="1" eType="#//BookItemType"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DigitalItem" eSuperTypes="#//LibraryItem">
+    <eOperations name="calculateTotalDownloads" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt">
+      <eParameters name="orders" upperBound="-1" eType="#//Order"/>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="option" lowerBound="1"
+        eType="#//DigitalItemOption"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" lowerBound="1" eType="#//DigitalItemType"/>
+  </eClassifiers>
+</ecore:EPackage>

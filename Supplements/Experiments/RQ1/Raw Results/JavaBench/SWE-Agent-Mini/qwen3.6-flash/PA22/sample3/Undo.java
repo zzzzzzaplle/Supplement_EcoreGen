@@ -1,0 +1,5 @@
+public class Undo extends Action {
+    public Undo(int initiator) {
+        super(initiator);
+    }
+}

@@ -1,0 +1,3 @@
+interface SokobanGame {
+    void run();
+}

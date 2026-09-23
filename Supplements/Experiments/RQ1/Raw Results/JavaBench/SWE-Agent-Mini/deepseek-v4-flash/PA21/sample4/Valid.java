@@ -1,0 +1,22 @@
+import java.util.List;
+import java.util.ArrayList;
+
+public class Valid extends MoveResult {
+    private Position origPosition;
+
+    public Valid() {
+    }
+
+    public Valid(Position newPosition, Position origPosition) {
+        super(newPosition);
+        this.origPosition = origPosition;
+    }
+
+    public Position getOrigPosition() {
+        return origPosition;
+    }
+
+    public void setOrigPosition(Position origPosition) {
+        this.origPosition = origPosition;
+    }
+}

@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: EcoreGenTLShowcase
+Bundle-SymbolicName: EcoreGenTLShowcase; singleton:=true
+Bundle-Version: 0.1.0.qualifier
+Require-Bundle: org.eclipse.emf.ecore,
+ edu.ustb.sei.mde.eecg;bundle-version="1.0.0"

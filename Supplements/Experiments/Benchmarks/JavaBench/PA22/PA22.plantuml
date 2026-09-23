@@ -1,0 +1,215 @@
+@startuml
+
+interface SokobanGame {
+  + run() : void
+}
+
+abstract class AbstractSokobanGame {
+  # state : GameState
+  - isExitSpecified : boolean
+  # AbstractSokobanGame(gameState : GameState)
+  # shouldStop() : boolean
+  # processAction(action : Action) : ActionResult
+}
+
+class TerminalSokobanGame {
+  - inputEngine : InputEngine
+  - renderingEngine : RenderingEngine
+  + TerminalSokobanGame(gameState : GameState, inputEngine : TerminalInputEngine, renderingEngine : TerminalRenderingEngine)
+  + run() : void
+}
+
+interface InputEngine {
+  + fetchAction() : Action
+}
+
+class TerminalInputEngine {
+  - terminalScanner : Scanner
+  + TerminalInputEngine(terminalStream : InputStream)
+  + fetchAction() : Action
+}
+
+interface RenderingEngine {
+  + render(state : GameState) : void
+  + message(content : String) : void
+}
+
+class TerminalRenderingEngine {
+  - outputStream : PrintStream
+  + TerminalRenderingEngine(outputStream : PrintStream)
+  + render(state : GameState) : void
+  + message(content : String) : void
+}
+
+abstract class Action {
+  # initiator : int
+  # Action(initiator : int)
+  + getInitiator() : int
+}
+
+class Exit {
+  + Exit(initiator : int)
+}
+
+class InvalidInput {
+  - message : String
+  + InvalidInput(initiator : int, message : String)
+  + getMessage() : String
+}
+
+class Undo {
+  + Undo(initiator : int)
+}
+
+abstract class Move {
+  # Move(initiator : int)
+  + {abstract} nextPosition(currentPosition : Position) : Position
+}
+
+class Down {
+  + Down(initiator : int)
+  + nextPosition(currentPosition : Position) : Position
+}
+
+class Left {
+  + Left(initiator : int)
+  + nextPosition(currentPosition : Position) : Position
+}
+
+class Right {
+  + Right(initiator : int)
+  + nextPosition(currentPosition : Position) : Position
+}
+
+class Up {
+  + Up(initiator : int)
+  + nextPosition(currentPosition : Position) : Position
+}
+
+abstract class ActionResult {
+  # action : Action
+  # ActionResult(action : Action)
+
+}
+
+class Success {
+  + Success(action : Action)
+}
+
+class Failed {
+  - reason : String
+}
+
+abstract class Entity {
+}
+
+class Box {
+  - playerId : int
+  + Box(playerId : int)
+  + getPlayerId() : int
+}
+
+class Empty {
+}
+
+class Player {
+  - id : int
+  + Player(id : int)
+  + getId() : int
+}
+
+class Wall {
+}
+
+class Position {
+  - x : int
+  - y : int
+  + Position(x : int, y : int)
+  + x() : int
+  + y() : int
+  + {static} of(x : int, y : int) : Position
+}
+
+class GameMap {
+  - map : Map<Position, Entity>
+  - maxWidth : int
+  - maxHeight : int
+  - destinations : Set<Position>
+  - undoLimit : int
+  + GameMap(maxWidth : int, maxHeight : int, destinations : Set<Position>, undoLimit : int)
+  - GameMap(map : Map<Position, Entity>, destinations : Set<Position>, undoLimit : int)
+  + {static} parse(mapText : String) : GameMap
+  + getEntity(position : Position) : Entity
+  + putEntity(position : Position, entity : Entity) : void
+  + getDestinations() : Set<Position>
+  + getUndoLimit() : Optional<Integer>
+  + getPlayerIds() : Set<Integer>
+  + getMaxWidth() ：int
+  + getMaxHeight() :int
+}
+
+class GameState {
+  - boardWidth : int
+  - boardHeight : int
+  - undoQuota : int
+
+  + getPlayerPositionById(id : int) : Position
+  + getAllPlayerPositions() : Set<Position>
+  + getEntity(position : Position) : Entity
+  + getDestinations() : Set<Position>
+  + isWin() : boolean
+  + move(from : Position, to : Position) : void
+  + checkpoint() : void
+  + undo() : void
+  + getMapMaxWidth() : int
+  + getMapMaxHeight() : int
+}
+
+class GameStateTransition {
+  - moves : Map<Position, Position>
+
+  + add(from : Position, to : Position) : void
+  + reverse() : GameStateTransition
+}
+
+
+
+
+SokobanGame <|.. AbstractSokobanGame
+AbstractSokobanGame <|-- TerminalSokobanGame
+
+InputEngine <|.. TerminalInputEngine
+RenderingEngine <|.. TerminalRenderingEngine
+
+Action <|-- Exit
+Action <|-- InvalidInput
+Action <|-- Undo
+Action <|-- Move
+
+
+Move <|-- Down
+Move <|-- Left
+Move <|-- Right
+Move <|-- Up
+
+
+ActionResult <|-- Success
+ActionResult <|-- Failed
+
+Entity <|-- Box
+Entity <|-- Empty
+Entity <|-- Player
+Entity <|-- Wall
+
+
+
+AbstractSokobanGame "1" *-- "1" GameState : state
+TerminalSokobanGame "1" *-- "1" InputEngine : inputEngine
+TerminalSokobanGame "1" *-- "1" RenderingEngine : renderingEngine
+
+ActionResult "1" o-- "1" Action : action
+
+GameMap "1" *-- "*" Entity : map
+GameMap "1" *-- "*" Position : destinations
+
+@enduml

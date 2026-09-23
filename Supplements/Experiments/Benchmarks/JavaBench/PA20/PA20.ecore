@@ -1,0 +1,593 @@
+<?xml version="1.0" encoding="utf8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="pa20" nsURI="http://www.example.org/pa20" nsPrefix="pa20">
+  <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+    <details key="requirement" value=" Overview&#xA;  This project implements a customized board game called JesonMor. It is a turn-based, two-player game played on a&#xA;  square grid board of odd size (e.g., 9x9). The game features two types of pieces: Knight and Archer, each with unique&#xA;  movement and capture mechanics inspired by Western and Chinese chess. Players take turns moving their pieces,&#xA;  accumulating a score based on the Manhattan distance of each move. The game incorporates a rule-based validation&#xA;  pipeline to ensure all moves are legal. The game also includes a protection phase for the first N moves where&#xA;  capturing is prohibited. The system provides the core game loop, piece movement logic, and rule validations.&#xA;  &#xA;  Functional Requirements&#xA;  Game Control and Loop (JesonMor)&#xA;  Game Initialization: The game starts by loading a Configuration which provides the board size (must be odd), initial&#xA;  piece placements, players, central place (located at size/2, size/2), and the number of protected moves.&#xA;  Turn-Based Execution: Implement a continuous game loop where players take turns sequentially. In each turn, fetch the&#xA;  available moves for the current player, prompt the player to make a choice (via Player.nextMove), execute the move,&#xA;  update the player's score, and refresh the console output.&#xA;  Move Execution: When a move is executed, the piece at the source square must be moved to the destination square on the&#xA;   2D board array. The source square becomes empty (null).&#xA;  Score Calculation: After a successful move, the current player's score increases by the Manhattan distance between the&#xA;   source and destination squares. A move is executed and scored only if it passes all applicable rules; otherwise the board state and scores remain&#xA;  unchanged for that attempt.&#xA;  Win Condition: After each move, evaluate if a player has won. Protection is active when&#xA;  game.numMoves &lt; numMovesProtection (strictly less than); no winner can be declared during protection.&#xA;  Once game.numMoves >= numMovesProtection, protection ends and a player wins&#xA;   if either:&#xA;  1. A Knight leaves the central square (source is central place and destination is not central place), or&#xA;  2. Only one player's pieces remain on the board (all opponent pieces have been captured).&#xA;  Additionally, if a player has no available moves on their turn, the game ends and the winner is decided by score&#xA;  comparison: the player with higher score wins; if scores are equal, the current player wins.&#xA;  Piece Movement Logic (Knight and Archer)&#xA;  Knight: Moves in an L shape (two squares in one direction, one in the orthogonal direction). However, unlike Western&#xA;  chess, it can be blocked by an adjacent piece in its primary direction of movement (similar to the Horse in Chinese&#xA;  chess). Specifically, if the Knight moves 2 squares horizontally and 1 square vertically, the blocking square is at&#xA;  ((source.x + destination.x) / 2, source.y); if it moves 1 square horizontally and 2 squares vertically, the blocking&#xA;  square is at (source.x, (source.y + destination.y) / 2). The move is invalid if any piece occupies this intermediate&#xA;  square.&#xA;  Archer: Moves any distance orthogonally without jumping. For non-capturing moves, the path between source and&#xA;  destination must be completely clear (no pieces in between). For capturing moves, there must be exactly one piece (of&#xA;  any color) between the source and destination, which serves as the &quot;screen&quot; or &quot;mount&quot; for the capture (similar to the&#xA;   Cannon in Chinese chess).&#xA;  Move Generation: Each piece's getAvailableMoves(game, source) method is responsible&#xA;  for returning the final list of legal moves for that piece. It must apply ALL&#xA;  applicable rules internally:&#xA;  - Global rules: source not vacant (VacantRule), source ≠ destination (NilMoveRule),&#xA;    within board boundaries (OutOfBoundaryRule), destination not friendly (OccupiedRule),&#xA;    and protection period check (FirstNMovesProtectionRule).&#xA;  - Piece-specific rules: Knight applies KnightMoveRule and KnightBlockRule;&#xA;    Archer applies ArcherMoveRule. A piece does NOT validate rules belonging to&#xA;    other piece types.&#xA;  Game.getAvailableMoves(player) simply iterates over all pieces belonging to the&#xA;  player, calls each piece's getAvailableMoves(game, position), and aggregates&#xA;  the results without additional filtering.&#xA;  Piece Labels: Knight displays as 'K', Archer displays as 'A'.&#xA;  Rule Validation System (Rule Implementations)&#xA;  Global Rules: Source must not be vacant (VacantRule), source and destination must differ (NilMoveRule), source and&#xA;  destination must be within board limits (OutOfBoundaryRule), and destination cannot contain a friendly piece&#xA;  (OccupiedRule).&#xA;  Protection Rule: Protection is active when game.numMoves &lt; configuration.numMovesProtection.&#xA;  During protection, no piece can be captured (FirstNMovesProtectionRule).&#xA;  The protection phase also prevents win condition evaluation.&#xA;  Piece-Specific Rules: Knight moves must conform to its L shape and blocking constraints (KnightMoveRule,&#xA;  KnightBlockRule). Archer moves must conform to its orthogonal sliding and jumping capture constraints&#xA;  (ArcherMoveRule).&#xA;  Board Display and Coordinates&#xA;  The board uses a coordinate system where columns are labeled with letters (a, b, c, ...) and rows are labeled with&#xA;  numbers (1, 2, 3, ...), both starting from the bottom-left corner. User input format is &quot;source->destination&quot; (e.g.,&#xA;  &quot;a1->b2&quot;). Empty squares display as '.', and the central square (when empty) displays as 'x'. Pieces display with&#xA;  their color and label (e.g., a red Knight displays as a red 'K').&#xA;  Internal board representation contract: The board is stored as board[x][y] (x = column, y = row, both 0-based from&#xA;  bottom-left). Board reads should go through Game.getPiece(Place) or Game.getPiece(int x, int y). Board writes&#xA;  (e.g., in movePiece) should directly manipulate the 2D array via Game.getBoard()[x][y] = piece / null.&#xA;  There is no Game.setPiece() method. Direct indexing into board[][] is allowed for write operations in Game subclasses.&#xA;  ConsolePlayer Input Contract&#xA;  ConsolePlayer.nextMove(Game game, EList&lt;Move> availableMoves) prompts the user&#xA;  to choose a move from the list of available (already-validated legal) moves.&#xA;&#xA;  Input format: The user enters a move as a coordinate &quot;source->destination&quot; (e.g., &quot;a1->b2&quot; means moving the piece at column a, row 1&#xA;  to column b, row 2).&#xA;  Coordinate parsing rules:&#xA;  - Column letter: 'a' maps to x=0, 'b' to x=1, 'c' to x=2, etc.&#xA;  - Row number: '1' maps to y=0, '2' to y=1, '3' to y=2, etc. (1-based to 0-based)&#xA;  - Parse source and destination separately using these rules.&#xA;  Validation: After parsing, the ConsolePlayer must verify that the parsed move&#xA;  (with matching source and destination coordinates) exists in availableMoves.&#xA;  If the input is invalid (wrong format, out of bounds, source has no piece,&#xA;  move not in availableMoves, etc.), print an error message and re-prompt&#xA;  (loop until a valid coordinate input is provided).&#xA;&#xA;  External Knowledge and Tools&#xA;  The following infrastructure classes and tools are already fully implemented in the project but are NOT included in&#xA;  the Ecore model. You can invoke them directly when generating code:&#xA;  MoveRecord: An independent data class that records a player and their move, with methods such as getPlayer() and&#xA;  getMove(). It is available as a utility type (not required by the current JesonMor core loop).&#xA;  InvalidConfigurationError:  Throw this when encountering invalid initialization parameters."/>
+  </eAnnotations>
+  <eClassifiers xsi:type="ecore:EClass" name="Place">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="x">
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="y">
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    </eStructuralFeatures>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Move">
+    <eOperations name="clone" eType="//Move">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="// Use EMF utilities for basic object cloning&#xA;Move cloned = (Move) org.eclipse.emf.ecore.util.EcoreUtil.copy(this);&#xA;&#xA;// Since source and destination are not containment=true, EcoreUtil.copy only performs shallow copy of references&#xA;// Need to manually create new Place objects to implement deep copy logic from original code&#xA;if (this.getSource() != null) {&#xA;    Place newSource = Pa20Factory.eINSTANCE.createPlace();&#xA;    newSource.setX(this.getSource().getX());&#xA;    newSource.setY(this.getSource().getY());&#xA;    cloned.setSource(newSource);&#xA;}&#xA;&#xA;if (this.getDestination() != null) {&#xA;    Place newDest = Pa20Factory.eINSTANCE.createPlace();&#xA;    newDest.setX(this.getDestination().getX());&#xA;    newDest.setY(this.getDestination().getY());&#xA;    cloned.setDestination(newDest);&#xA;}&#xA;&#xA;return cloned;"/>
+      </eAnnotations>
+    </eOperations>
+    <eOperations name="equal">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="if (this == o) return true;&#xA;if (o == null || getClass() != o.getClass()) return false;&#xA;Move move = (Move) o;&#xA;&#xA;// 1. Manually compare Source coordinate values (null-safe)&#xA;Place s1 = this.getSource();&#xA;Place s2 = move.getSource();&#xA;boolean sourceEq = (s1 == s2) || &#xA;                   (s1 != null &amp;&amp; s2 != null &amp;&amp; s1.getX() == s2.getX() &amp;&amp; s1.getY() == s2.getY());&#xA;&#xA;// 2. Manually compare Destination coordinate values (null-safe)&#xA;Place d1 = this.getDestination();&#xA;Place d2 = move.getDestination();&#xA;boolean destEq = (d1 == d2) || &#xA;                 (d1 != null &amp;&amp; d2 != null &amp;&amp; d1.getX() == d2.getX() &amp;&amp; d1.getY() == d2.getY());&#xA;&#xA;return sourceEq &amp;&amp; destEq;"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+      <eParameters name="o">
+        <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EJavaObject"/>
+      </eParameters>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="source" lowerBound="1" eType="//Place"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="destination" lowerBound="1" eType="//Place"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="Color">
+    <eLiterals name="DEFAULT"/>
+    <eLiterals name="BLACK" value="1"/>
+    <eLiterals name="RED" value="2"/>
+    <eLiterals name="GREEN" value="3"/>
+    <eLiterals name="YELLOW" value="4"/>
+    <eLiterals name="BLUE" value="5"/>
+    <eLiterals name="PURPLE" value="6"/>
+    <eLiterals name="CYAN" value="7"/>
+    <eLiterals name="WHITE" value="8"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Player" abstract="true">
+    <eOperations name="nextMove" eType="//Move">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eParameters name="game" eType="//Game"/>
+      <eParameters name="availableMoves" upperBound="-1" eType="//Move"/>
+    </eOperations>
+    <eOperations name="equal">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="if (this == o) return true;&#xA;if (o == null || getClass() != o.getClass()) return false;&#xA;Player player = (Player) o;&#xA;&#xA;// Use Getter to retrieve name attribute and compare&#xA;if (this.getName() == null) {&#xA;    return player.getName() == null;&#xA;}&#xA;return this.getName().equals(player.getName());"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+      <eParameters name="o">
+        <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EJavaObject"/>
+      </eParameters>
+    </eOperations>
+    <eOperations name="clone" eType="//Player">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value=" Player cloned;&#xA;    try {&#xA;      cloned = (Player) org.eclipse.emf.ecore.util.EcoreUtil.copy(this);&#xA;    } catch (Exception e) {&#xA;      try {&#xA;        java.lang.reflect.Constructor&lt;? extends Player> ctor =&#xA;            this.getClass().getDeclaredConstructor();&#xA;        ctor.setAccessible(true);&#xA;        cloned = ctor.newInstance();&#xA;      } catch (Exception ex) {&#xA;        throw new RuntimeException(&quot;Failed to clone Player of type &quot; + this.getClass().getName(), ex);&#xA;      }&#xA;    }&#xA;    cloned.setName(this.getName());&#xA;    cloned.setScore(this.getScore());&#xA;    cloned.setColor(this.getColor());&#xA;    return cloned;"/>
+      </eAnnotations>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" iD="true">
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="score" unique="false">
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="color" unique="false" eType="//Color"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Piece" abstract="true">
+    <eOperations name="getLabel">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="true"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Summary:&#xA;Returns the character label used to display the piece on the board.&#xA;Algorithm:&#xA;1. Return the subclass-defined label.&#xA;Related Features:&#xA;- Piece.player&#xA;Related Classes: None&#xA;Input:&#xA;- None.&#xA;Output:&#xA;- A single character label.&#xA;  - Knight returns 'K'&#xA;  - Archer returns 'A'&#xA;Pre-condition:&#xA;- The concrete piece instance is initialized.&#xA;Post-condition:&#xA;- No state is changed."/>
+        <details key="body" value="// TODO: Please generate a body of this unimplemented method based on the docstring&#xD;&#xA;// TODO: Replace the current body with the generated body &#xD;&#xA;// TODO: Ensure that you mark it @generated NOT after code completion&#xD;&#xA;throw new UnsupportedOperationException();&#xD;&#xA;"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EChar"/>
+    </eOperations>
+    <eOperations name="getAvailableMoves" upperBound="-1" eType="//Move">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="true"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Summary:&#xA;Abstract operation that returns all legal moves for the piece from a source position.&#xA;Concrete subclasses must apply their own movement rules plus the global validation rules.&#xA;Algorithm:&#xA;1. Enumerate candidate destination squares according to the concrete piece’s movement pattern.&#xA;2. Apply global rules and piece-specific rules.&#xA;3. Return the final list of legal moves.&#xA;Related Features:&#xA;- Piece.player&#xA;- Piece.getLabel()&#xA;Related Classes: Game, Move, Place, Player&#xA;Input:&#xA;- game: current Game instance.&#xA;- source: current position of this piece.&#xA;Output:&#xA;- A list of legal moves for this piece.&#xA;Pre-condition:&#xA;- Implemented by a concrete subclass.&#xA;- game and source are not null.&#xA;Post-condition:&#xA;- No board state is changed.&#xA;- Returned moves are legal under this piece’s movement rules and global rules."/>
+        <details key="body" value="// TODO: Please generate a body of this unimplemented method based on the docstring&#xD;&#xA;// TODO: Replace the current body with the generated body &#xD;&#xA;// TODO: Ensure that you mark it @generated NOT after code completion&#xD;&#xA;throw new UnsupportedOperationException();&#xD;&#xA;"/>
+      </eAnnotations>
+      <eParameters name="game" eType="//Game"/>
+      <eParameters name="source" eType="//Place"/>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="player" lowerBound="1" eType="//Player"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Configuration">
+    <eOperations name="InitConfiguration">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value=" if (size&lt;3) {&#xA;        throw new InvalidConfigurationError(&quot;size of gameboard must be at least 3&quot;);&#xA;    }&#xA;    if (size % 2 != 1) {&#xA;        throw new InvalidConfigurationError(&quot;size of gameboard must be an odd number&quot;);&#xA;    }&#xA;    if (size > 25) {&#xA;        throw new InvalidConfigurationError(&quot;size of gameboard is at most 26&quot;);&#xA;    }&#xA;    this.setSize(size);&#xA;    &#xA;    // EMF 中 players 被映射为 EList，直接操作集合&#xA;    if (players == null || players.size() != 2) {&#xA;        throw new InvalidConfigurationError(&quot;there must be exactly two players&quot;);&#xA;    }&#xA;    this.getPlayers().clear();&#xA;    this.getPlayers().addAll(players);&#xA;    &#xA;    // 初始化二维数组，使用 EDataType 中定义的 instanceClassName (edu.pa20.Piece)&#xA;    edu.pa20.Piece[][] board = new edu.pa20.Piece[size][];&#xA;    for (int x = 0; x &lt; size; x++) {&#xA;        board[x] = new edu.pa20.Piece[size];&#xA;        for (int y = 0; y &lt; size; y++) {&#xA;            board[x][y] = null;&#xA;        }&#xA;    }&#xA;    this.setInitialBoard(board);&#xA;    &#xA;    // 使用 EMF Factory 实例化 Place&#xA;    Place center = Pa20Factory.eINSTANCE.createPlace();&#xA;    center.setX(size / 2);&#xA;    center.setY(size / 2);&#xA;    this.setCentralPlace(center);&#xA;    &#xA;    if (numMovesProtection &lt; 0) {&#xA;        throw new InvalidConfigurationError(&quot;number of moves with capture protection cannot be negative&quot;);&#xA;    }&#xA;    this.setNumMovesProtection(numMovesProtection);"/>
+      </eAnnotations>
+      <eParameters name="size">
+        <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+      </eParameters>
+      <eParameters name="players" upperBound="-1" eType="//Player"/>
+      <eParameters name="numMovesProtection">
+        <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+      </eParameters>
+    </eOperations>
+    <eOperations name="addInitialPiece">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="// 使用 getPlayers().get(index) 访问 EList 中的元素&#xA;if (!piece.getPlayer().equals(this.getPlayers().get(0)) &amp;&amp; !piece.getPlayer().equals(this.getPlayers().get(1))) {&#xA;    throw new assignment.protocol.exception.InvalidConfigurationError(&quot;the player of the piece is unknown&quot;);&#xA;}&#xA;&#xA;// 使用 getX(), getY() 和 getSize() 获取属性&#xA;if (place.getX() >= this.getSize() || place.getY() >= this.getSize() || place.getX() &lt; 0 || place.getY() &lt; 0) {&#xA;    throw new assignment.protocol.exception.InvalidConfigurationError(&quot;the place (&quot; + place.getX() + &quot;, &quot; + place.getY() + &quot;) must be inside the gameboard&quot;);&#xA;}&#xA;&#xA;// EMF 默认的 equals 往往是引用比较，保险起见采用坐标值比对&#xA;Place central = this.getCentralPlace();&#xA;if (central != null &amp;&amp; place.getX() == central.getX() &amp;&amp; place.getY() == central.getY()) {&#xA;    throw new assignment.protocol.exception.InvalidConfigurationError(&quot;piece cannot be put at central place initially&quot;);&#xA;}&#xA;&#xA;// 获取二维数组并赋值&#xA;edu.pa20.Piece[][] board = this.getInitialBoard();&#xA;if (board != null) {&#xA;    board[place.getX()][place.getY()] = piece;&#xA;}"/>
+      </eAnnotations>
+      <eParameters name="piece" eType="//Piece"/>
+      <eParameters name="place" eType="//Place"/>
+    </eOperations>
+    <eOperations name="addInitialPiece">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="// Use EMF Factory to instantiate Place&#xA;Place tempPlace = Pa20Factory.eINSTANCE.createPlace();&#xA;tempPlace.setX(x);&#xA;tempPlace.setY(y);&#xA;&#xA;// Call the already adapted addInitialPiece(Piece piece, Place place)&#xA;this.addInitialPiece(piece, tempPlace);"/>
+      </eAnnotations>
+      <eParameters name="piece" eType="//Piece"/>
+      <eParameters name="x">
+        <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+      </eParameters>
+      <eParameters name="y">
+        <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+      </eParameters>
+    </eOperations>
+    <eOperations name="clone" eType="//Configuration">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="// 使用 EMF 原生的复制机制作为基础&#xA;    Configuration cloned = (Configuration) org.eclipse.emf.ecore.util.EcoreUtil.copy(this);&#xA;    &#xA;    // 1. players 是非 containment 引用（测试里可能放入 MockPlayer 等非 EMF 对象），clone 时应保持引用语义&#xA;&#xA;    cloned.getPlayers().clear();&#xA;    cloned.getPlayers().addAll(this.getPlayers());&#xA;&#xA;    &#xA;    // 2. 深拷贝 initialBoard (PieceArray2D)&#xA;    // 必须手动分配新数组以脱离引用共享&#xA;    edu.pa20.Piece[][] origBoard = this.getInitialBoard();&#xA;    if (origBoard != null) {&#xA;        int sz = this.getSize();&#xA;        edu.pa20.Piece[][] newBoard = new edu.pa20.Piece[sz][];&#xA;        for (int i = 0; i &lt; sz; i++) {&#xA;            newBoard[i] = new edu.pa20.Piece[sz];&#xA;            // 浅拷贝 Piece 引用即可（符合原逻辑）&#xA;            System.arraycopy(origBoard[i], 0, newBoard[i], 0, sz);&#xA;        }&#xA;        cloned.setInitialBoard(newBoard);&#xA;    }&#xA;    &#xA;    // 3. centralPlace 处理说明：&#xA;    // 由于你在 Ecore 中将 centralPlace 设为了 containment=&quot;true&quot;，&#xA;    // EcoreUtil.copy(this) 已经自动在底层对其完成了深拷贝，因此无需再写 cloned.centralPlace = this.centralPlace.clone()。&#xA;    &#xA;    return cloned;"/>
+      </eAnnotations>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="size">
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numMovesProtection">
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="players" lowerBound="2" upperBound="2" eType="//Player"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="centralPlace" lowerBound="1" eType="//Place" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="initialBoard" eType="//PieceArray2D"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EDataType" name="PieceArray2D" instanceClassName="edu.pa20.Piece[][]"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Game" abstract="true">
+    <eOperations name="start" eType="//Player">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+    </eOperations>
+    <eOperations name="getWinner" eType="//Player">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eParameters name="lastPlayer" eType="//Player"/>
+      <eParameters name="lastPiece" eType="//Piece"/>
+      <eParameters name="lastMove" eType="//Move"/>
+    </eOperations>
+    <eOperations name="updateScore">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eParameters name="player" eType="//Player"/>
+      <eParameters name="piece" eType="//Piece"/>
+      <eParameters name="move" eType="//Move"/>
+    </eOperations>
+    <eOperations name="getAvailableMoves" upperBound="-1" eType="//Move">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eParameters name="player" eType="//Player"/>
+    </eOperations>
+    <eOperations name="movePiece">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eParameters name="move" eType="//Move"/>
+    </eOperations>
+    <eOperations name="getPiece" eType="//Piece">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="edu.pa20.Piece[][] board = this.getBoard();&#xA;if (board != null &amp;&amp; place != null) {&#xA;    return board[place.getX()][place.getY()];&#xA;}&#xA;return null;"/>
+      </eAnnotations>
+      <eParameters name="place" eType="//Place"/>
+    </eOperations>
+    <eOperations name="getPiece" eType="//Piece">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="// Use EMF Factory to instantiate temporary Place object&#xA;Place tempPlace = Pa20Factory.eINSTANCE.createPlace();&#xA;tempPlace.setX(x);&#xA;tempPlace.setY(y);&#xA;// Delegate to another overloaded method&#xA;return this.getPiece(tempPlace);"/>
+      </eAnnotations>
+      <eParameters name="x">
+        <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+      </eParameters>
+      <eParameters name="y">
+        <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+      </eParameters>
+    </eOperations>
+    <eOperations name="refreshOutput">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="int size = this.getConfiguration().getSize();&#xA;java.util.ArrayList&lt;java.util.List&lt;String>> contents = new java.util.ArrayList&lt;java.util.List&lt;String>>();&#xA;for (int row = size - 1; row >= 0; row--) {&#xA;    java.util.ArrayList&lt;String> rowContent = new java.util.ArrayList&lt;String>();&#xA;    for (int col = 0; col &lt; size; col++) {&#xA;        Piece piece = this.getPiece(col, row);&#xA;        if (piece == null) {&#xA;            // EMF适配：不使用 new Place()，而是直接获取中心点对比坐标值&#xA;            Place centralPlace = this.getConfiguration().getCentralPlace();&#xA;            if (centralPlace != null &amp;&amp; centralPlace.getX() == col &amp;&amp; centralPlace.getY() == row) {&#xA;                rowContent.add(&quot;x&quot;);&#xA;            } else {&#xA;                rowContent.add(&quot;.&quot;);&#xA;            }&#xA;        } else {&#xA;            Player player = piece.getPlayer();&#xA;            rowContent.add(String.format(&quot;%s%c%s&quot;,&#xA;                    player.getColor(),&#xA;                    piece.getLabel(),&#xA;                    Color.DEFAULT)); // 注意：如果在Impl中找不到Color，需改为全限定包名如 edu.pa20.Color.DEFAULT&#xA;        }&#xA;    }&#xA;    contents.add(rowContent);&#xA;}&#xA;java.util.ArrayList&lt;String> xCoordinates = new java.util.ArrayList&lt;String>();&#xA;for (int i = 0; i &lt; size; i++) {&#xA;    xCoordinates.add(String.valueOf((char) ('a' + i)));&#xA;}&#xA;java.util.Collections.reverse(contents);&#xA;&#xA;// clear screen&#xA;System.out.print(&quot;\u001b[2J&quot;);&#xA;System.out.flush();&#xA;&#xA;System.out.println();&#xA;System.out.println(&quot;### COMP3021 Programming Assignment 1 ###&quot;);&#xA;System.out.println();&#xA;System.out.println(&quot;Guide: to move a piece, input the coordinate of source and the destination.&quot;);&#xA;System.out.println(&quot;For example: a1->b2 means to move the piece at 'a1' to 'b2'&quot;);&#xA;&#xA;if (this.getNumMoves() &lt; this.getConfiguration().getNumMovesProtection()) {&#xA;    System.out.println();&#xA;    System.out.println(&quot;Notice: first &quot; + this.getConfiguration().getNumMovesProtection() + &quot; moves are not allowed to capture pieces or win the game.&quot;);&#xA;}&#xA;System.out.println();&#xA;System.out.println(&quot;Total Moves: &quot; + this.getNumMoves());&#xA;&#xA;// print scores of players&#xA;for (Player player : this.getConfiguration().getPlayers()) {&#xA;    System.out.printf(&quot;%s%s%s score: %d\n&quot;, player.getColor(), player.getName(), Color.DEFAULT, player.getScore());&#xA;}&#xA;System.out.println();&#xA;&#xA;// print the gameboard&#xA;int leftPadding = 8;&#xA;StringBuilder paddingSpaceBuilder = new StringBuilder();&#xA;paddingSpaceBuilder.append(&quot; &quot;.repeat(leftPadding));&#xA;System.out.printf(&quot;%s%s\n&quot;,&#xA;        paddingSpaceBuilder.toString(),&#xA;        xCoordinates.parallelStream().collect(java.util.stream.Collectors.joining(&quot; &quot;)));&#xA;&#xA;StringBuilder borderBuilder = new StringBuilder();&#xA;borderBuilder.append(&quot;-&quot;.repeat(Math.max(0, contents.get(0).size() * 2 - 1)));&#xA;System.out.printf(&quot;%s%s\n&quot;,&#xA;        paddingSpaceBuilder.toString(),&#xA;        borderBuilder.toString());&#xA;&#xA;for (int row = contents.size() - 1; row >= 0; row--) {&#xA;    System.out.printf(&quot;%&quot; + (leftPadding - 1) + &quot;d|%s|%d\n&quot;,&#xA;            row + 1,&#xA;            contents.get(row).parallelStream().map(Object::toString).collect(java.util.stream.Collectors.joining(&quot; &quot;)),&#xA;            row + 1);&#xA;}&#xA;System.out.printf(&quot;%s%s\n&quot;,&#xA;        paddingSpaceBuilder.toString(),&#xA;        borderBuilder.toString());&#xA;System.out.printf(&quot;%s%s\n&quot;,&#xA;        paddingSpaceBuilder.toString(),&#xA;        xCoordinates.parallelStream().collect(java.util.stream.Collectors.joining(&quot; &quot;)));&#xA;System.out.println();"/>
+      </eAnnotations>
+    </eOperations>
+    <eOperations name="getPlayer" upperBound="-1" eType="//Player">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="return this.getConfiguration().getPlayers();"/>
+      </eAnnotations>
+    </eOperations>
+    <eOperations name="getCentralPlace" eType="//Place">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="return this.getConfiguration().getCentralPlace();"/>
+      </eAnnotations>
+    </eOperations>
+    <eOperations name="clone" eType="//Game">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value=" // 1. 使用 EMF 原生复制，彻底抛弃 java.lang.Cloneable 接口和 super.clone()&#xA;&#x9;    // EcoreUtil.copy 会自动帮你处理好 EMF 底层的各种状态&#xA;&#x9;    Game cloned = (Game) org.eclipse.emf.ecore.util.EcoreUtil.copy(this);&#xA;&#x9;    &#xA;&#x9;    // 2. 手动深拷贝二维数组 board (因为 EcoreUtil.copy 无法深拷贝原生多维数组)&#xA;&#x9;    edu.pa20.Piece[][] originalBoard = this.getBoard();&#xA;&#x9;    if (originalBoard != null) {&#xA;&#x9;        int size = this.getConfiguration().getSize();&#xA;&#x9;        edu.pa20.Piece[][] clonedBoard = new edu.pa20.Piece[size][];&#xA;&#x9;        for (int i = 0; i &lt; size; i++) {&#xA;&#x9;            clonedBoard[i] = new edu.pa20.Piece[size];&#xA;&#x9;            // 浅拷贝 Piece 引用即可&#xA;&#x9;            System.arraycopy(originalBoard[i], 0, clonedBoard[i], 0, size);&#xA;&#x9;        }&#xA;&#x9;        cloned.setBoard(clonedBoard);&#xA;&#x9;    }&#xA;&#x9;    &#xA;&#x9;    // 3. 拷贝 currentPlayer 和 Configuration&#xA;&#x9;    // 注意：如果在你的 Ecore 模型中，currentPlayer 和 configuration 不是 containment=&quot;true&quot;，&#xA;&#x9;    // 那么 EcoreUtil.copy 只做了浅拷贝，你需要像下面这样手动触发深拷贝。&#xA;&#x9;    // 如果它们是 containment=&quot;true&quot;，则以下代码可以删除，因为 EcoreUtil 已经拷过了。&#xA;&#x9;    if (this.getConfiguration() != null) {&#xA;&#x9;        try {&#xA;&#x9;            cloned.setConfiguration(this.getConfiguration().clone());&#xA;&#x9;        } catch (Exception e) {&#xA;&#x9;            throw new RuntimeException(&quot;Configuration clone failed&quot;, e);&#xA;&#x9;        }&#xA;&#x9;    }&#xA;&#x9;    if (this.getCurrentPlayer() != null) {&#xA;&#x9;        // currentPlayer 是非 containment 引用；测试里通常是 MockPlayer（非 EMF 对象），不能用 EMF 的 EcoreUtil.copy&#xA;&#x9;        cloned.setCurrentPlayer(this.getCurrentPlayer());&#xA;&#x9;    }&#xA;&#x9;    &#xA;&#x9;    return cloned;"/>
+      </eAnnotations>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="configuration" lowerBound="1" eType="//Configuration"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="board" eType="//PieceArray2D"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="currentPlayer" eType="//Player"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numMoves" defaultValueLiteral="0">
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    </eStructuralFeatures>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="JesonMor" eSuperTypes="//Game">
+    <eOperations name="start" eType="//Player">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="true"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Summary:&#xA;Starts and runs the complete turn-based game loop until a winner is determined.&#xA;Algorithm:&#xA;1. Initialize current player from configuration.&#xA;2. Repeat until the game ends:&#xA;   - Compute available moves for current player.&#xA;   - If no moves exist, determine winner by score rule and terminate.&#xA;   - Ask current player for a move using nextMove(game, availableMoves).&#xA;   - Execute the move by calling movePiece.&#xA;   - Update the current player’s score using updateScore.&#xA;   - Increase numMoves.&#xA;   - Refresh the console output.&#xA;   - Evaluate winner using getWinner.&#xA;   - If a winner exists, terminate and return it.&#xA;   - Otherwise switch to the next player.&#xA;3. Return the winner.&#xA;Related Features:&#xA;- Game.currentPlayer&#xA;- Game.numMoves&#xA;- Game.getAvailableMoves(Player)&#xA;- Game.movePiece(Move)&#xA;- Game.updateScore(Player, Piece, Move)&#xA;- Game.refreshOutput()&#xA;- Game.getWinner(Player, Piece, Move)&#xA;Related Classes: Game, Move, Piece, Player&#xA;Input:&#xA;- None.&#xA;Output:&#xA;- The winning Player when the game ends.&#xA;Pre-condition:&#xA;- The configuration is valid and fully initialized.&#xA;- Players and initial board setup are available.&#xA;Post-condition:&#xA;- The game loop has executed until a terminal condition.&#xA;- numMoves and player scores reflect all successful moves made during the game."/>
+        <details key="body" value="// TODO: Please generate a body of this unimplemented method based on the docstring&#xD;&#xA;// TODO: Replace the current body with the generated body &#xD;&#xA;// TODO: Ensure that you mark it @generated NOT after code completion&#xD;&#xA;throw new UnsupportedOperationException();&#xD;&#xA;"/>
+      </eAnnotations>
+    </eOperations>
+    <eOperations name="getWinner" eType="//Player">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="true"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Summary:&#xA;Determines the winner after a move or when a player has no available moves, using the&#xA;protection rule, piece-removal rule, knight-central-square rule, and score tiebreak rule.&#xA;Algorithm:&#xA;1. If the game is still in protection phase (numMoves &lt; numMovesProtection), return null.&#xA;2. Check if only one player's pieces remain:&#xA;   - If yes, return the remaining player's owner.&#xA;3. Check if the last move caused a Knight to leave the central square:&#xA;   - If lastPiece is a Knight and lastMove.source equals central place and&#xA;     lastMove.destination does not equal central place, return lastPlayer.&#xA;4. If the current player has no available moves:&#xA;   - Compare current player score with the other player's score.&#xA;   - Return the player with the higher score.&#xA;   - If scores are equal, return the current player.&#xA;5. Otherwise return null.&#xA;Related Features:&#xA;- Game.numMoves&#xA;- Game.configuration.numMovesProtection&#xA;- Game.getCentralPlace()&#xA;- Game.getAvailableMoves(Player)&#xA;- Player.score&#xA;Related Classes: Game, Move, Piece, Player, Place, Knight&#xA;Input:&#xA;- lastPlayer: player who made the most recent successful move.&#xA;- lastPiece: the moved piece.&#xA;- lastMove: the most recent move.&#xA;Output:&#xA;- The winning Player if a win condition is satisfied.&#xA;- null if the game should continue.&#xA;Pre-condition:&#xA;- game state is initialized.&#xA;- lastPlayer, lastPiece, and lastMove are not null when evaluating a just-completed move.&#xA;Post-condition:&#xA;- No state is modified.&#xA;- Protection phase prevents winner declaration."/>
+        <details key="body" value="// TODO: Please generate a body of this unimplemented method based on the docstring&#xD;&#xA;// TODO: Replace the current body with the generated body &#xD;&#xA;// TODO: Ensure that you mark it @generated NOT after code completion&#xD;&#xA;throw new UnsupportedOperationException();&#xD;&#xA;"/>
+      </eAnnotations>
+      <eParameters name="lastPlayer" eType="//Player"/>
+      <eParameters name="lastPiece" eType="//Piece"/>
+      <eParameters name="lastMove" eType="//Move"/>
+    </eOperations>
+    <eOperations name="updateScore">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="true"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Summary:&#xA;Increases a player's score by the Manhattan distance between the source and destination of a successful move.&#xA;Algorithm:&#xA;1. Compute dx = abs(move.destination.x - move.source.x).&#xA;2. Compute dy = abs(move.destination.y - move.source.y).&#xA;3. Increase player.score by dx + dy.&#xA;Related Features:&#xA;- Player.score&#xA;- Move.source&#xA;- Move.destination&#xA;Related Classes: Move, Player, Place&#xA;Input:&#xA;- player: the player whose score will be updated.&#xA;- piece: the moved piece, used to support score updates after a successful move.&#xA;- move: the executed move.&#xA;Output:&#xA;- None.&#xA;Pre-condition:&#xA;- player, piece, and move are not null.&#xA;- move has already been executed successfully.&#xA;Post-condition:&#xA;- player.score increases by the Manhattan distance of the move.&#xA;- No other state is modified."/>
+        <details key="body" value="// TODO: Please generate a body of this unimplemented method based on the docstring&#xD;&#xA;// TODO: Replace the current body with the generated body &#xD;&#xA;// TODO: Ensure that you mark it @generated NOT after code completion&#xD;&#xA;throw new UnsupportedOperationException();&#xD;&#xA;"/>
+      </eAnnotations>
+      <eParameters name="player" eType="//Player"/>
+      <eParameters name="piece" eType="//Piece"/>
+      <eParameters name="move" eType="//Move"/>
+    </eOperations>
+    <eOperations name="movePiece">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="true"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Summary:&#xA;Moves a piece on the internal board from source to destination, clearing the source square.&#xA;This method performs the board update for a move that has already been validated.&#xA;Algorithm:&#xA;1. Read the piece from move.source.&#xA;2. Write that piece into move.destination on the board array.&#xA;3. Set move.source on the board array to null.&#xA;4. If the move is a capture, the destination occupant is replaced by the moving piece.&#xA;Related Features:&#xA;- Game.board&#xA;- Game.getPiece(Place)&#xA;- Game.getPiece(int, int)&#xA;Related Classes: Game, Move, Place, Piece&#xA;Input:&#xA;- move: a validated move to execute.&#xA;Output:&#xA;- None.&#xA;Pre-condition:&#xA;- move is valid and has passed all applicable rules.&#xA;- move.source contains a piece.&#xA;- move.destination is within the board.&#xA;Post-condition:&#xA;- The moving piece occupies the destination square.&#xA;- The source square becomes empty (null).&#xA;- No score is changed by this method alone."/>
+        <details key="body" value="// TODO: Please generate a body of this unimplemented method based on the docstring&#xD;&#xA;// TODO: Replace the current body with the generated body &#xD;&#xA;// TODO: Ensure that you mark it @generated NOT after code completion&#xD;&#xA;throw new UnsupportedOperationException();&#xD;&#xA;"/>
+      </eAnnotations>
+      <eParameters name="move" lowerBound="1" eType="//Move"/>
+    </eOperations>
+    <eOperations name="getAvailableMoves" upperBound="-1" eType="//Move">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="true"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Summary:&#xA;Returns the aggregated set of legal moves for the given player by collecting the legal&#xA;moves of each piece owned by that player.&#xA;Algorithm:&#xA;1. Create an empty move list.&#xA;2. Iterate over every board position or every piece belonging to the player.&#xA;3. For each owned piece:&#xA;   - Call piece.getAvailableMoves(game, position).&#xA;   - Append all returned moves to the aggregate list.&#xA;4. Return the aggregate list without further filtering.&#xA;Related Features:&#xA;- Game.board&#xA;- Game.configuration&#xA;- Game.getPiece(Place)&#xA;- Game.getPlayer()&#xA;Related Classes: Game, Move, Piece, Player, Place&#xA;Input:&#xA;- player: the player whose legal moves are requested.&#xA;Output:&#xA;- A List&lt;Move> containing all legal moves for all pieces owned by player.&#xA;- The result may contain multiple moves from different pieces, and may be empty.&#xA;Pre-condition:&#xA;- player is not null.&#xA;- the game board and configuration are initialized.&#xA;Post-condition:&#xA;- No board state is changed.&#xA;- Returned moves are already validated by each piece implementation."/>
+        <details key="body" value="// TODO: Please generate a body of this unimplemented method based on the docstring&#xD;&#xA;// TODO: Replace the current body with the generated body &#xD;&#xA;// TODO: Ensure that you mark it @generated NOT after code completion&#xD;&#xA;throw new UnsupportedOperationException();&#xD;&#xA;"/>
+      </eAnnotations>
+      <eParameters name="player" eType="//Player"/>
+    </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ConsolePlayer" eSuperTypes="//Player">
+    <eOperations name="nextMove" eType="//Move">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="true"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Summary:&#xA;Prompts the human user to choose one move from the provided list of already-validated legal moves,&#xA;repeatedly parsing input until a valid move is entered.&#xA;Algorithm:&#xA;1. Display available moves and prompt for input in the form &quot;source->destination&quot;.&#xA;2. Read user input from the console.&#xA;3. Parse source and destination coordinates:&#xA;   - column letter a,b,c,... maps to x = 0,1,2,...&#xA;   - row number 1,2,3,... maps to y = 0,1,2,...&#xA;4. Build a Move from the parsed coordinates.&#xA;5. Check whether the parsed move exists in availableMoves.&#xA;6. If valid, return the matching move.&#xA;7. If invalid, print an error message and repeat from step 2.&#xA;Related Features:&#xA;- Player.name&#xA;- Player.color&#xA;- Player.score&#xA;- Player.nextMove()&#xA;Related Classes: Game, Move, Place, Player&#xA;Input:&#xA;- game: current Game instance, used for context and possibly display.&#xA;- availableMoves: list of moves already validated by the game.&#xA;Output:&#xA;- A Move selected by the user from availableMoves.&#xA;- The returned move is guaranteed to be an element of availableMoves.&#xA;Pre-condition:&#xA;- game is not null.&#xA;- availableMoves is not null and contains at least one legal move.&#xA;- Console input is available.&#xA;Post-condition:&#xA;- No game state is modified by this method directly.&#xA;- The returned move matches one of the provided legal moves."/>
+        <details key="body" value="// TODO: Please generate a body of this unimplemented method based on the docstring&#xD;&#xA;// TODO: Replace the current body with the generated body &#xD;&#xA;// TODO: Ensure that you mark it @generated NOT after code completion&#xD;&#xA;throw new UnsupportedOperationException();&#xD;&#xA;"/>
+      </eAnnotations>
+      <eParameters name="game" eType="//Game"/>
+      <eParameters name="availableMoves" upperBound="-1" eType="//Move"/>
+    </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RandomPlayer" eSuperTypes="//Player">
+    <eOperations name="nextMove" eType="//Move">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="true"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Summary:&#xA;Selects and returns one move chosen uniformly at random from the provided list of available moves.&#xA;Algorithm:&#xA;1. If availableMoves is null or empty, return null.&#xA;2. Generate a random integer index i such that 0 &lt;= i &lt; availableMoves.size().&#xA;3. Return availableMoves.get(i).&#xA;Related Features:&#xA;- Player.nextMove()&#xA;- Player.name&#xA;- Player.color&#xA;- Player.score&#xA;Related Classes: Game, Move&#xA;Input:&#xA;- game: the current Game instance. It is provided for compatibility with the Player.nextMove signature and is not modified by this operation.&#xA;- availableMoves: a list of already validated legal moves for the current player; may be empty.&#xA;Output:&#xA;- A Move selected at random from availableMoves, or null if availableMoves is empty.&#xA;Pre-condition:&#xA;- game is not null.&#xA;- availableMoves is not null.&#xA;Post-condition:&#xA;- The game state is unchanged.&#xA;- If availableMoves is non-empty, the returned move is an element of availableMoves."/>
+        <details key="body" value="// TODO: Please generate a body of this unimplemented method based on the docstring&#xD;&#xA;// TODO: Replace the current body with the generated body &#xD;&#xA;// TODO: Ensure that you mark it @generated NOT after code completion&#xD;&#xA;throw new UnsupportedOperationException();&#xD;&#xA;"/>
+      </eAnnotations>
+      <eParameters name="game" eType="//Game"/>
+      <eParameters name="availableMoves" upperBound="-1" eType="//Move"/>
+    </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Knight" eSuperTypes="//Piece">
+    <eOperations name="getLabel">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="return 'K';"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EChar"/>
+    </eOperations>
+    <eOperations name="getAvailableMoves" upperBound="-1" eType="//Move">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="true"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Summary:&#xA;Returns all legal destination moves for the Knight from a given source square, applying&#xA;global rules and Knight-specific movement/blocking rules.&#xA;Algorithm:&#xA;1. Create an empty move list.&#xA;2. For every board square as a candidate destination:&#xA;   - Build a Move(source, destination).&#xA;   - Validate global rules:&#xA;     VacantRule, NilMoveRule, OutOfBoundaryRule, OccupiedRule, FirstNMovesProtectionRule.&#xA;   - If all global rules pass, validate KnightMoveRule.&#xA;   - If KnightMoveRule passes, validate KnightBlockRule.&#xA;   - If all pass, add move to the result list.&#xA;3. Return the collected legal moves.&#xA;Related Features:&#xA;- Piece.player&#xA;- Piece.getLabel()&#xA;- KnightMoveRule.validate()&#xA;- KnightBlockRule.validate()&#xA;- FirstNMovesProtectionRule.validate()&#xA;Related Classes: Game, Move, Place, Rule, KnightMoveRule, KnightBlockRule, FirstNMovesProtectionRule, VacantRule, NilMoveRule, OutOfBoundaryRule, OccupiedRule&#xA;Input:&#xA;- game: current Game instance.&#xA;- source: position of the Knight piece.&#xA;Output:&#xA;- A List&lt;Move> containing all legal Knight moves from source.&#xA;Pre-condition:&#xA;- game is not null.&#xA;- source contains a Knight piece.&#xA;Post-condition:&#xA;- No board state changes.&#xA;- All returned moves satisfy Knight movement and blocking rules."/>
+        <details key="body" value="// TODO: Please generate a body of this unimplemented method based on the docstring&#xD;&#xA;// TODO: Replace the current body with the generated body &#xD;&#xA;// TODO: Ensure that you mark it @generated NOT after code completion&#xD;&#xA;throw new UnsupportedOperationException();&#xD;&#xA;"/>
+      </eAnnotations>
+      <eParameters name="game" eType="//Game"/>
+      <eParameters name="source" eType="//Place"/>
+    </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Archer" eSuperTypes="//Piece">
+    <eOperations name="getLabel">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="return 'A';"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EChar"/>
+    </eOperations>
+    <eOperations name="getAvailableMoves" upperBound="-1" eType="//Move">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="true"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Summary:&#xA;Returns all legal destination moves for the Archer from a given source square.&#xA;Algorithm:&#xA;1. Create an empty move list.&#xA;2. For every board square as a candidate destination:&#xA;   - Build a Move(source, destination).&#xA;   - Validate it against global rules in this order:&#xA;     VacantRule, NilMoveRule, OutOfBoundaryRule, OccupiedRule, FirstNMovesProtectionRule.&#xA;   - If all global rules pass, validate ArcherMoveRule.&#xA;   - If all validations pass, add the move to the result list.&#xA;3. Return the collected legal moves.&#xA;Related Features:&#xA;- Piece.player&#xA;- Piece.getLabel()&#xA;- ArcherMoveRule.validate()&#xA;- FirstNMovesProtectionRule.validate()&#xA;- VacantRule.validate()&#xA;- NilMoveRule.validate()&#xA;- OutOfBoundaryRule.validate()&#xA;- OccupiedRule.validate()&#xA;Related Classes: Game, Move, Place, ArcherMoveRule, FirstNMovesProtectionRule, VacantRule, NilMoveRule, OutOfBoundaryRule, OccupiedRule&#xA;Input:&#xA;- game: current Game instance, used to read board state, configuration, and protection status.&#xA;- source: the board position of the Archer piece.&#xA;Output:&#xA;- A List&lt;Move> containing every legal move available to the Archer from source.&#xA;- The list may be empty if no legal move exists.&#xA;Pre-condition:&#xA;- game is not null.&#xA;- source is not null and is within the board boundary.&#xA;- game.getPiece(source) is an Archer.&#xA;- The board state and configuration are initialized.&#xA;Post-condition:&#xA;- No board state is changed.&#xA;- Returned moves satisfy all global rules and Archer movement rules.&#xA;- Returned moves do not include illegal captures during the protection phase."/>
+        <details key="body" value="// TODO: Please generate a body of this unimplemented method based on the docstring&#xD;&#xA;// TODO: Replace the current body with the generated body &#xD;&#xA;// TODO: Ensure that you mark it @generated NOT after code completion&#xD;&#xA;throw new UnsupportedOperationException();&#xD;&#xA;"/>
+      </eAnnotations>
+      <eParameters name="game" eType="//Game"/>
+      <eParameters name="source" eType="//Place"/>
+    </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="VacantRule" eSuperTypes="//Rule">
+    <eOperations name="validate">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="true"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Summary:&#xA;Ensures that the source square contains a piece.&#xA;Algorithm:&#xA;1. Read the piece at move.source.&#xA;2. Return true if a piece exists there.&#xA;3. Otherwise return false.&#xA;Related Features:&#xA;- Move.source&#xA;- Game.getPiece(Place)&#xA;Related Classes: Game, Move, Place, Rule, Piece&#xA;Input:&#xA;- game: current game state.&#xA;- move: candidate move.&#xA;Output:&#xA;- true if the source square is occupied by any piece.&#xA;- false if the source square is empty.&#xA;Pre-condition:&#xA;- game and move are not null.&#xA;Post-condition:&#xA;- No state is changed."/>
+        <details key="body" value="// TODO: Please generate a body of this unimplemented method based on the docstring&#xD;&#xA;// TODO: Replace the current body with the generated body &#xD;&#xA;// TODO: Ensure that you mark it @generated NOT after code completion&#xD;&#xA;throw new UnsupportedOperationException();&#xD;&#xA;"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+      <eParameters name="game" eType="//Game"/>
+      <eParameters name="move" eType="//Move"/>
+    </eOperations>
+    <eOperations name="getDescription">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="return &quot;the source of move should have a piece&quot;;"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="OutOfBoundaryRule" eSuperTypes="//Rule">
+    <eOperations name="validate">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="true"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Summary:&#xA;Ensures both source and destination are inside the board limits.&#xA;Algorithm:&#xA;1. Obtain board size from configuration.&#xA;2. Check source.x, source.y, destination.x, destination.y.&#xA;3. Return false if any coordinate is outside [0, size - 1].&#xA;4. Otherwise return true.&#xA;Related Features:&#xA;- Game.configuration&#xA;- Configuration.size&#xA;- Move.source&#xA;- Move.destination&#xA;Related Classes: Game, Move, Place, Rule, Configuration&#xA;Input:&#xA;- game: current game state.&#xA;- move: candidate move.&#xA;Output:&#xA;- true if both source and destination are within the board.&#xA;- false otherwise.&#xA;Pre-condition:&#xA;- game and move are not null.&#xA;- configuration.size is a positive odd integer.&#xA;Post-condition:&#xA;- No state is changed."/>
+        <details key="body" value="// TODO: Please generate a body of this unimplemented method based on the docstring&#xD;&#xA;// TODO: Replace the current body with the generated body &#xD;&#xA;// TODO: Ensure that you mark it @generated NOT after code completion&#xD;&#xA;throw new UnsupportedOperationException();&#xD;&#xA;"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+      <eParameters name="game" eType="//Game"/>
+      <eParameters name="move" eType="//Move"/>
+    </eOperations>
+    <eOperations name="getDescription">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="return &quot;place is out of boundary of gameboard&quot;;"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="OccupiedRule" eSuperTypes="//Rule">
+    <eOperations name="validate">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="true"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Summary:&#xA;Rejects moves whose destination contains a friendly piece.&#xA;Algorithm:&#xA;1. Read the piece at move.destination.&#xA;2. If destination is empty, return true.&#xA;3. If destination contains a piece of the same player as the moving piece, return false.&#xA;4. Otherwise return true.&#xA;Related Features:&#xA;- Move.destination&#xA;- Piece.player&#xA;- Game.getPiece(Place)&#xA;Related Classes: Game, Move, Place, Piece, Player&#xA;Input:&#xA;- game: current game state.&#xA;- move: candidate move.&#xA;Output:&#xA;- true if the destination is empty or occupied by an opposing piece.&#xA;- false if the destination contains a friendly piece.&#xA;Pre-condition:&#xA;- game and move are not null.&#xA;- move.source contains a piece, so the moving piece owner can be identified.&#xA;Post-condition:&#xA;- No state is changed."/>
+        <details key="body" value="// TODO: Please generate a body of this unimplemented method based on the docstring&#xD;&#xA;// TODO: Replace the current body with the generated body &#xD;&#xA;// TODO: Ensure that you mark it @generated NOT after code completion&#xD;&#xA;throw new UnsupportedOperationException();&#xD;&#xA;"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+      <eParameters name="game" eType="//Game"/>
+      <eParameters name="move" eType="//Move"/>
+    </eOperations>
+    <eOperations name="getDescription">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value=" return &quot;piece cannot be captured by another piece belonging to the same player&quot;;"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="NilMoveRule" eSuperTypes="//Rule">
+    <eOperations name="validate">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="true"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Summary:&#xA;Returns whether a move has different source and destination squares.&#xA;Algorithm:&#xA;1. Read move.source and move.destination.&#xA;2. If source and destination are the same Place, return false.&#xA;3. Otherwise, return true.&#xA;Related Features:&#xA;- Move.source&#xA;- Move.destination&#xA;Related Classes: Move, Place&#xA;Input:&#xA;- game: current game state; not used by this rule, but provided by the validation interface.&#xA;- move: candidate move to be checked.&#xA;Output:&#xA;- true if move.source and move.destination are not the same square.&#xA;- false if move.source and move.destination refer to the same square.&#xA;Pre-condition:&#xA;- game and move are not null.&#xA;- move.source and move.destination are not null.&#xA;Post-condition:&#xA;- No state is changed."/>
+        <details key="body" value="// TODO: Please generate a body of this unimplemented method based on the docstring&#xD;&#xA;// TODO: Replace the current body with the generated body &#xD;&#xA;// TODO: Ensure that you mark it @generated NOT after code completion&#xD;&#xA;throw new UnsupportedOperationException();&#xD;&#xA;"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+      <eParameters name="game" eType="//Game"/>
+      <eParameters name="move" eType="//Move"/>
+    </eOperations>
+    <eOperations name="getDescription">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="return &quot;the source and destination of move should be different places&quot;;"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="KnightMoveRule" eSuperTypes="//Rule">
+    <eOperations name="validate">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="true"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Summary:&#xA;Checks whether a move is a valid Knight move with exact L-shape geometry.&#xA;Algorithm:&#xA;1. Compute absolute differences dx and dy between source and destination.&#xA;2. Return true if and only if:&#xA;   - (dx == 2 and dy == 1) or&#xA;   - (dx == 1 and dy == 2)&#xA;3. Otherwise return false.&#xA;Related Features:&#xA;- Move.source&#xA;- Move.destination&#xA;Related Classes: Game, Move, Place, Rule&#xA;Input:&#xA;- game: current game state.&#xA;- move: candidate move to validate.&#xA;Output:&#xA;- true if the move is an L-shaped Knight move.&#xA;- false otherwise.&#xA;Pre-condition:&#xA;- game and move are not null.&#xA;Post-condition:&#xA;- No state is changed."/>
+        <details key="body" value="// TODO: Please generate a body of this unimplemented method based on the docstring&#xD;&#xA;// TODO: Replace the current body with the generated body &#xD;&#xA;// TODO: Ensure that you mark it @generated NOT after code completion&#xD;&#xA;throw new UnsupportedOperationException();&#xD;&#xA;"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+      <eParameters name="game" eType="//Game"/>
+      <eParameters name="move" eType="//Move"/>
+    </eOperations>
+    <eOperations name="getDescription">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="return &quot;knight move rule is violated&quot;;"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="KnightBlockRule" eSuperTypes="//Rule">
+    <eOperations name="validate">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="true"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Summary:&#xA;Checks whether a Knight’s L-shaped move is blocked by an intervening piece in the Knight’s primary direction.&#xA;Algorithm:&#xA;1. Let source = move.source and destination = move.destination.&#xA;2. Compute dx = |destination.x - source.x| and dy = |destination.y - source.y|.&#xA;3. If the move is not an L-shaped Knight move (dx, dy are not (2,1) or (1,2)), return false.&#xA;4. Determine the blocking square:&#xA;   - If dx = 2 and dy = 1, blocking square = ((source.x + destination.x) / 2, source.y).&#xA;   - If dx = 1 and dy = 2, blocking square = (source.x, (source.y + destination.y) / 2).&#xA;5. Read the piece at the blocking square from the game board.&#xA;6. Return false if the blocking square contains any piece; otherwise return true.&#xA;Related Features:&#xA;- Move.source&#xA;- Move.destination&#xA;- Game.getPiece(Place)&#xA;Related Classes: Game, Move, Place&#xA;Input:&#xA;- game: current game state.&#xA;- move: candidate move to validate.&#xA;Output:&#xA;- true if the Knight’s intermediate blocking square is empty.&#xA;- false if the move is not a valid Knight L-shape or the intermediate blocking square contains any piece.&#xA;Pre-condition:&#xA;- game and move are not null.&#xA;- move.source and move.destination are valid board coordinates.&#xA;Post-condition:&#xA;- No state is changed."/>
+        <details key="body" value="// TODO: Please generate a body of this unimplemented method based on the docstring&#xD;&#xA;// TODO: Replace the current body with the generated body &#xD;&#xA;// TODO: Ensure that you mark it @generated NOT after code completion&#xD;&#xA;throw new UnsupportedOperationException();&#xD;&#xA;"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+      <eParameters name="game" eType="//Game"/>
+      <eParameters name="move" eType="//Move"/>
+    </eOperations>
+    <eOperations name="getDescription">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="return &quot;knight is blocked by another piece&quot;;"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FirstNMovesProtectionRule" eSuperTypes="//Rule">
+    <eOperations name="validate">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="true"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Summary:&#xA;Determines whether a move violates the early-game protection phase, during which captures are forbidden.&#xA;Algorithm:&#xA;1. Check whether game.numMoves &lt; numProtectedMoves.&#xA;2. If protection is inactive, return true.&#xA;3. If protection is active:&#xA;   - Inspect the destination square.&#xA;   - If destination is occupied, return false.&#xA;   - Otherwise return true.&#xA;Related Features:&#xA;- FirstNMovesProtectionRule.numProtectedMoves&#xA;- Game.numMoves&#xA;- Game.getPiece(Place)&#xA;Related Classes: Game, Move, Place, Rule, Piece&#xA;Input:&#xA;- game: current game state.&#xA;- move: candidate move.&#xA;Output:&#xA;- true if the move is allowed during the current protection status.&#xA;- false if the move attempts a capture during protection.&#xA;Pre-condition:&#xA;- game and move are not null.&#xA;- numProtectedMoves is non-negative.&#xA;Post-condition:&#xA;- No state is changed.&#xA;- The result depends only on the current move count and destination occupancy."/>
+        <details key="body" value="// TODO: Please generate a body of this unimplemented method based on the docstring&#xD;&#xA;// TODO: Replace the current body with the generated body &#xD;&#xA;// TODO: Ensure that you mark it @generated NOT after code completion&#xD;&#xA;throw new UnsupportedOperationException();&#xD;&#xA;"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+      <eParameters name="game" eType="//Game"/>
+      <eParameters name="move" eType="//Move"/>
+    </eOperations>
+    <eOperations name="getDescription">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="return &quot;Capturing piece in the first &quot; + this.numProtectedMoves + &quot; moves are not allowed&quot;;"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numProtectedMoves" defaultValueLiteral="5">
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    </eStructuralFeatures>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ArcherMoveRule" eSuperTypes="//Rule">
+    <eOperations name="validate">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="true"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Summary:&#xA;Checks whether a move follows Archer movement rules: orthogonal sliding movement, with&#xA;non-capturing moves requiring a clear path and capturing moves requiring exactly one&#xA;intervening piece as the screen.&#xA;Algorithm:&#xA;1. Read source and destination from the move.&#xA;2. Reject if move is not orthogonal:&#xA;   - source.x != destination.x and source.y != destination.y must hold.&#xA;3. Determine whether destination is empty:&#xA;   - If empty, this is a non-capturing move.&#xA;     a. Check every square strictly between source and destination.&#xA;     b. If any square is occupied, return false.&#xA;     c. Otherwise return true.&#xA;   - If occupied, this is a capturing move.&#xA;     a. Check every square strictly between source and destination.&#xA;     b. Count occupied squares.&#xA;     c. Return true only if exactly one intervening piece exists.&#xA;4. Otherwise return false.&#xA;Related Features:&#xA;- Move.source&#xA;- Move.destination&#xA;- Game.getPiece(Place)&#xA;- Game.getPiece(int, int)&#xA;Related Classes: Game, Move, Place, Rule, Piece&#xA;Input:&#xA;- game: current Game instance used to inspect the board.&#xA;- move: candidate move to validate.&#xA;Output:&#xA;- true if the move is a valid Archer move under orthogonal sliding/capture rules.&#xA;- false otherwise.&#xA;Pre-condition:&#xA;- game and move are not null.&#xA;- move.source and move.destination are within or can be tested against the board limits.&#xA;Post-condition:&#xA;- No state is modified.&#xA;- Return value reflects only Archer movement legality."/>
+        <details key="body" value="// TODO: Please generate a body of this unimplemented method based on the docstring&#xD;&#xA;// TODO: Replace the current body with the generated body &#xD;&#xA;// TODO: Ensure that you mark it @generated NOT after code completion&#xD;&#xA;throw new UnsupportedOperationException();&#xD;&#xA;"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+      <eParameters name="game" eType="//Game"/>
+      <eParameters name="move" eType="//Move"/>
+    </eOperations>
+    <eOperations name="getDescription">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="return &quot;archer move rule is violated&quot;;"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Rule" abstract="true" interface="true">
+    <eOperations name="validate">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+      <eParameters name="game" eType="//Game"/>
+      <eParameters name="move" eType="//Move"/>
+    </eOperations>
+    <eOperations name="getDescription">
+      <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+        <details key="generated" value="manual"/>
+      </eAnnotations>
+      <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eOperations>
+  </eClassifiers>
+</ecore:EPackage>

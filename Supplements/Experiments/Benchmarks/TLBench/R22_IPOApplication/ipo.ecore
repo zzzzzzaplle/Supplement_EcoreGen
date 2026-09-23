@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="ipo" nsURI="http://www.example.org/ipo" nsPrefix="ipo">
+  <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+    <details key="requirement" value="Retail customers should be eligible for applying IPO. Customers who will make IPO Applications must share their name, surname, email address, and telephone number information with the related company.&#xA;&#xA;When a customer applies IPO, he is required to upload legal allowance documentation. Each document has a name that identifies the allowance document. When the customer completes the application process successfully, the bank should send two information emails, one for the customer and another for the company. If the customer has many failed attempts, the bank should restrict the customer from the application process. If they would like to apply anyway, they should call the &quot;call center&quot; and request IPO application access.&#xA;&#xA;Even though the customer completed the process successfully, the purchase is still being determined. Related companies always have a right to reject customers' applications. If a company rejects the customer, our system should inform the customer. Email content should include the customer's name, surname, email address, and telephone number, the applied company name, the number of shares that have been purchased, and the amount of money that has been paid.&#xA;&#xA;Functional requirement:&#xA;1. Create an IPO application. A retail customer starts an IPO application by providing the target company, the number of shares greater than 0, the payment amount greater than 0, and a non-null allowance document. The system checks that the customer is currently eligible to apply and has no approved application for the same company name. The operation returns true when the application record is created successfully; otherwise, false.&#xA;2. Approve or reject an application. The bank can approve or reject only a pending application. Approval is allowed only when the related customer is still eligible to apply for IPO. When the bank approves an application, the system sends two information emails, one to the customer and one to the company. When the bank rejects an application, the system sends one rejection email to the customer, and the rejection email content includes the customer's name, surname, email address, telephone number, the company name, the number of shares, and the paid amount. The operation returns true on success; otherwise, false.&#xA;3. Retrieve a customer's application-count summary. The customer can view how many IPO applications have been completed in total. Only approved and rejected applications are counted. Pending applications and canceled applications are not counted. The operation returns 0 when the customer has no approved or rejected applications.&#xA;4. Query the total approved IPO application amount for a customer. The customer can view the sum of the paid amounts of all approved IPO applications. Pending and rejected applications are excluded from the total. The operation returns 0 when the customer has no approved applications.&#xA;5. Cancel a pending application. By providing a company name, a customer can cancel an application that is still pending. Approved and rejected applications cannot be canceled. The operation returns true when cancellation succeeds; otherwise, false."/>
+  </eAnnotations>
+  <eClassifiers xsi:type="ecore:EEnum" name="ApplicationStatus">
+    <eLiterals name="PENDING"/>
+    <eLiterals name="APPROVAL" value="1"/>
+    <eLiterals name="REJECTED" value="2"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Document">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Company">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="email" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Email">
+    <eOperations name="createEmailContent" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString">
+      <eParameters name="company" eType="#//Company"/>
+      <eParameters name="shares" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+      <eParameters name="customer" eType="#//Customer"/>
+      <eParameters name="amount" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="receiver" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="content" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Customer">
+    <eOperations name="createApplication" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean">
+      <eParameters name="company" eType="#//Company"/>
+      <eParameters name="shares" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+      <eParameters name="amount" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+      <eParameters name="doc" eType="#//Document"/>
+    </eOperations>
+    <eOperations name="getApplicationCount" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eOperations name="getApprovedTotalAmount" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eOperations name="cancelApplication" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean">
+      <eParameters name="companyName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eOperations>
+    <eOperations name="isEligibleForIPO" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="surname" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="email" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="telephone" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="canApplyForIPO" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="applications" upperBound="-1"
+        eType="#//Application" containment="true" eOpposite="#//Application/customer"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Application">
+    <eOperations name="approve" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eOperations name="reject" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eOperations name="cancel" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eOperations name="sendRejectionEmail"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="share" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="amountOfMoney" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="status" eType="#//ApplicationStatus"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="customer" lowerBound="1"
+        eType="#//Customer" eOpposite="#//Customer/applications"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="emails" upperBound="-1"
+        eType="#//Email" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="company" eType="#//Company"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="allowance" eType="#//Document"/>
+  </eClassifiers>
+</ecore:EPackage>

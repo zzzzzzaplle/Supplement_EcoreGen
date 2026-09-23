@@ -1,0 +1,20 @@
+public class Valid extends MoveResult {
+    public Position origPosition;
+
+    public Valid() {
+        super();
+    }
+
+    public Valid(Position newPosition, Position origPosition) {
+        super(newPosition);
+        this.origPosition = origPosition;
+    }
+
+    public Position getOrigPosition() {
+        return origPosition;
+    }
+
+    public void setOrigPosition(Position origPosition) {
+        this.origPosition = origPosition;
+    }
+}

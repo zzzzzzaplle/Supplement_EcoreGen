@@ -1,0 +1,55 @@
+import java.util.List;
+import java.util.ArrayList;
+
+public class Manager extends Employee {
+  private double salary;
+  private String position;
+  private List<Employee> subordinates;
+
+  public Manager() {
+    this.subordinates = new ArrayList<>();
+  }
+
+  public double getSalary() {
+    return salary;
+  }
+
+  public void setSalary(double salary) {
+    this.salary = salary;
+  }
+
+  public String getPosition() {
+    return position;
+  }
+
+  public void setPosition(String position) {
+    this.position = position;
+  }
+
+  public List<Employee> getSubordinates() {
+    return subordinates;
+  }
+
+  public void setSubordinates(List<Employee> subordinates) {
+    this.subordinates = subordinates;
+  }
+
+  public int getDirectSubordinateEmployeesCount() {
+    return subordinates.size();
+  }
+
+  @Override
+  public double calculateSalary() {
+    return Math.round(salary * 100.0) / 100.0;
+  }
+
+  @Override
+  public double calculateCommission() {
+    return 0;
+  }
+
+  @Override
+  public double calculateHolidayPremium() {
+    return 0;
+  }
+}

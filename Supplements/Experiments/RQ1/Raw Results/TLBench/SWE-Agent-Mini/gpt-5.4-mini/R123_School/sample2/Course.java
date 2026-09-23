@@ -1,0 +1,88 @@
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Course {
+    private String id;
+    private List<Document> documents;
+    private Sector sector;
+    private List<Session> sessions;
+
+    public Course() {
+        this.documents = new ArrayList<Document>();
+        this.sessions = new ArrayList<Session>();
+    }
+
+    public Course(String id) {
+        this();
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public List<Document> getDocuments() {
+        return documents;
+    }
+
+    public void setDocuments(List<Document> docs) {
+        this.documents = docs;
+    }
+
+    public Sector getSector() {
+        return sector;
+    }
+
+    public void setSector(Sector s) {
+        this.sector = s;
+    }
+
+    public List<Session> getSessions() {
+        return sessions;
+    }
+
+    public List<Session> addSession(LocalDate date) {
+        if (date != null) {
+            for (Session session : sessions) {
+                if (date.equals(session.getDate())) {
+                    return sessions;
+                }
+            }
+            sessions.add(new Session(date));
+        }
+        return sessions;
+    }
+
+    public boolean cancelSession(LocalDate date) {
+        if (date == null) return false;
+        for (int i = 0; i < sessions.size(); i++) {
+            Session session = sessions.get(i);
+            if (date.equals(session.getDate())) {
+                if (session.getParticipants() == null || session.getParticipants().isEmpty()) {
+                    sessions.remove(i);
+                    return true;
+                }
+                return false;
+            }
+        }
+        return false;
+    }
+
+    public boolean addDocument(Document doc) {
+        if (doc == null) return false;
+        if (documents == null) documents = new ArrayList<Document>();
+        if (documents.contains(doc)) return false;
+        documents.add(doc);
+        return true;
+    }
+
+    public boolean removeDocument(Document doc) {
+        if (doc == null || documents == null) return false;
+        return documents.remove(doc);
+    }
+}

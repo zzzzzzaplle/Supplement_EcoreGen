@@ -1,0 +1,56 @@
+import java.util.List;
+import java.util.ArrayList;
+
+public class Department {
+    private DepartmentType type;
+    private Manager manager;
+    private List<Employee> employees;
+
+    public Department() {
+        this.employees = new ArrayList<Employee>();
+    }
+
+    public DepartmentType getType() {
+        return type;
+    }
+
+    public void setType(DepartmentType type) {
+        this.type = type;
+    }
+
+    public Manager getManager() {
+        return manager;
+    }
+
+    public void setManager(Manager manager) {
+        this.manager = manager;
+    }
+
+    public List<Employee> getEmployees() {
+        return employees;
+    }
+
+    public void setEmployees(List<Employee> employees) {
+        this.employees = employees;
+    }
+
+    public double calculateAverageWorkerWorkingHours() {
+        double totalHours = 0.0;
+        int workerCount = 0;
+        if (employees == null) {
+            return 0.0;
+        }
+        for (Employee emp : employees) {
+            if (emp instanceof Worker) {
+                Worker worker = (Worker) emp;
+                totalHours += worker.getWeeklyWorkingHour();
+                workerCount++;
+            }
+        }
+        if (workerCount == 0) {
+            return 0.0;
+        }
+        double average = totalHours / workerCount;
+        return Math.round(average * 100.0) / 100.0;
+    }
+}

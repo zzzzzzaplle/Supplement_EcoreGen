@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="municipalLibrary" nsURI="http://www.example.org/municipalLibrary"
+    nsPrefix="municipalLibrary">
+  <eAnnotations source="http://www.ustb.edu.cn/sei/mde/EnhancedCodeGen">
+    <details key="requirement" value="We want to automate the management of a small municipal library. The library has a name and manages a collection of documents and a set of registered members. Members have a first name and a surname. Documents are uniquely identified by their title. Every document has a title. A volume is a kind of document and also has an author. A book is a kind of volume and also has a bookId that identifies the physical or catalogued copy. A dictionary is a kind of volume and also has a dictionaryId that identifies the dictionary entry in the library catalog. A comic is also a kind of volume and has a recipient name. A journal is a kind of document and has a publication date. Only books can be borrowed.&#xA;A registered member can borrow or return a book, and the system must always be able to list the titles currently borrowed by that member. A member can hold at most three borrowed books at the same time. When a borrowing succeeds, the system creates a borrow record containing the borrowing date, the borrowed book, and a return due date exactly seven days later. A borrowed book can be extended on request when the request is made before the current due date. A return is accepted only when the member currently holds that book and the book is not overdue. The system records dates in the format &quot;yyyy-MM-dd&quot;.&#xA;Functional requirement:&#xA;1. Register a new member. The library registers a new member from a first name and a surname. The first name and surname must not be null, empty, or whitespace-only. The library rejects a registration when another member already has exactly the same full name. A successful registration creates the member with no borrowed books and returns true. Any rejected registration returns false.&#xA;&#xA;2. Borrow a book and create a record in the system. A member borrows a document by title. The library accepts the request only when the title exists, the document is a book, the book is not already borrowed by any member, and the member currently holds fewer than three books. A successful borrowing creates a borrow record with today's date as the borrowing date and a due date exactly seven days later, then returns true. Any rejected borrowing returns false.&#xA;&#xA;3. Extend a borrowed record's return due date. A member may extend the due date of one of their own borrowed books by title. When today is on or after the borrowing date and strictly before the current due date, the library moves the due date forward by seven days and returns the new due date. Otherwise, the due date remains unchanged and the original due date is returned.&#xA;&#xA;4. Return a book. A member returns a borrowed book by title. If the member does not currently hold that title, the operation returns false. If the borrowed book is overdue, the return is rejected, the borrow record remains active, and the operation returns false. Otherwise the borrow record is removed and the operation returns true.&#xA;&#xA;5. List all borrowed book titles for a member. A member can list the titles of all currently borrowed books. If the member has no active borrowed books, the operation returns an empty list.&#xA;"/>
+  </eAnnotations>
+  <eClassifiers xsi:type="ecore:EDataType" name="Date" instanceClassName="java.util.Date"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Library">
+    <eOperations name="registerMember" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean">
+      <eParameters name="firstName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+      <eParameters name="surname" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eOperations>
+    <eOperations name="addDocument">
+      <eParameters name="doc" eType="#//Document"/>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="members" ordered="false"
+        upperBound="-1" eType="#//Member" containment="true" eOpposite="#//Member/library"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="documents" ordered="false"
+        upperBound="-1" eType="#//Document" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Member">
+    <eOperations name="borrowBook" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean">
+      <eParameters name="bookTitle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+      <eParameters name="today" eType="#//Date"/>
+    </eOperations>
+    <eOperations name="returnBook" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean">
+      <eParameters name="bookTitle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+      <eParameters name="today" eType="#//Date"/>
+    </eOperations>
+    <eOperations name="extendReturnDueDate" eType="#//Date">
+      <eParameters name="bookTitle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+      <eParameters name="today" eType="#//Date"/>
+    </eOperations>
+    <eOperations name="listBorrowedBookTitles" upperBound="-1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="library" lowerBound="1"
+        eType="#//Library" eOpposite="#//Library/members"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="firstName" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="surname" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="borrowRecords" upperBound="3"
+        eType="#//BorrowRecord" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="BorrowRecord">
+    <eOperations name="extendDueDate" eType="#//Date">
+      <eParameters name="today" eType="#//Date"/>
+    </eOperations>
+    <eOperations name="isOverdue" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean">
+      <eParameters name="today" eType="#//Date"/>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="borrowingDate" lowerBound="1"
+        eType="#//Date"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="returnDue" lowerBound="1"
+        eType="#//Date"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="book" lowerBound="1" eType="#//Book"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Document" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="title" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Journal" eSuperTypes="#//Document">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="publicationDate" lowerBound="1"
+        eType="#//Date"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Volume" abstract="true" eSuperTypes="#//Document">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Book" eSuperTypes="#//Volume">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="bookId" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Dictionary" eSuperTypes="#//Volume">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dictionaryId" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Comic" eSuperTypes="#//Volume">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="recipientName" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+</ecore:EPackage>

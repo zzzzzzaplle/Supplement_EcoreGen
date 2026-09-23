@@ -1,0 +1,4 @@
+enum EmployeeType {
+    TEMPORARY,
+    PERMANENT
+}

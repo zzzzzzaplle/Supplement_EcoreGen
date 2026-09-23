@@ -1,0 +1,26 @@
+public class ShiftWorker extends Worker {
+    private double holidayPremium;
+
+    public ShiftWorker() {
+    }
+
+    public double getHolidayPremium() {
+        return holidayPremium;
+    }
+
+    public void setHolidayPremium(double holidayPremium) {
+        this.holidayPremium = holidayPremium;
+    }
+
+    @Override
+    public void setDepartment(String department) {
+        if (!"Delivery".equalsIgnoreCase(department)) {
+            throw new IllegalArgumentException("ShiftWorker can only belong to the Delivery department");
+        }
+        super.setDepartment(department);
+    }
+
+    public double calculateHolidayPremium() {
+        return Math.round(holidayPremium * 100.0) / 100.0;
+    }
+}
