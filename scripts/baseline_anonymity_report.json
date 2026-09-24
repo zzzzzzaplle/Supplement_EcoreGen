@@ -1,0 +1,142 @@
+{
+  "author_name_files_count": 1,
+  "path_leak_files_count": 4,
+  "institution_files_count": 10031,
+  "author_files": {
+    "Experiments/RQ1/Scripts/Test/EcoreGenTL-TLBench-tests.py": [
+      {
+        "line_number": 86,
+        "risks": [
+          "AUTHOR_NAME_ZEQING",
+          "LOCAL_ONEDRIVE_PATH",
+          "HARDCODED_ABSOLUTE_PATH",
+          "INSTITUTION_USTB"
+        ],
+        "preview": "r\"C:\\Users\\Zeqing\\OneDrive\\2025-USTB\\iecoregen\\result-RQ2\\E-Workspace\","
+      },
+      {
+        "line_number": 89,
+        "risks": [
+          "AUTHOR_NAME_ZEQING",
+          "LOCAL_ONEDRIVE_PATH",
+          "HARDCODED_ABSOLUTE_PATH",
+          "INSTITUTION_USTB"
+        ],
+        "preview": "LIB_DIR = Path(r\"C:\\Users\\Zeqing\\OneDrive\\2025-USTB\\iecoregen\\lib\")"
+      },
+      {
+        "line_number": 94,
+        "risks": [
+          "HARDCODED_ABSOLUTE_PATH"
+        ],
+        "preview": "Path(r\"E:\\eclipse-dsl\\plugins\\org.eclipse.emf.ecore_2.41.0.v20251025-0946.jar\"),"
+      },
+      {
+        "line_number": 95,
+        "risks": [
+          "HARDCODED_ABSOLUTE_PATH"
+        ],
+        "preview": "Path(r\"E:\\eclipse-dsl\\plugins\\org.eclipse.emf.common_2.44.0.v20251025-0946.jar\"),"
+      },
+      {
+        "line_number": 96,
+        "risks": [
+          "HARDCODED_ABSOLUTE_PATH"
+        ],
+        "preview": "Path(r\"E:\\eclipse-dsl\\plugins\\org.eclipse.emf.ecore.xmi-2.39.0.jar\"),"
+      },
+      {
+        "line_number": 702,
+        "risks": [
+          "AUTHOR_NAME_ZEQING",
+          "LOCAL_ONEDRIVE_PATH",
+          "HARDCODED_ABSOLUTE_PATH",
+          "INSTITUTION_USTB"
+        ],
+        "preview": "report_dir = Path(r\"C:\\Users\\Zeqing\\OneDrive\\2025-USTB\\iecoregen\\Codebase_Python\\reports\")"
+      }
+    ]
+  },
+  "path_files": {
+    "Experiments/Benchmarks/TLBench/OPMS/testcode_Baseline/CR4_FundingGroupTypeTest.java": [
+      {
+        "line_number": 140,
+        "risks": [
+          "HARDCODED_ABSOLUTE_PATH"
+        ],
+        "preview": "* 注: D:\\eclipse-workshop\\testCase\\src\\test\\java\\FundingGroupTypeTest."
+      }
+    ],
+    "Experiments/Benchmarks/TLBench/OPMS/testcode_Baseline/CR1_TotalBudgetofAllProjectsTest.java": [
+      {
+        "line_number": 168,
+        "risks": [
+          "HARDCODED_ABSOLUTE_PATH"
+        ],
+        "preview": "* 注: D:\\eclipse-workshop\\testCase\\src\\test\\java\\"
+      }
+    ],
+    "Experiments/RQ1/Scripts/Test/EcoreGenTL-JavaBench-tests.py": [
+      {
+        "line_number": 62,
+        "risks": [
+          "HARDCODED_ABSOLUTE_PATH"
+        ],
+        "preview": "ECLIPSE_DSL_PLUGINS_DIR = Path(os.environ.get(\"ECLIPSE_DSL_PLUGINS_DIR\", r\"E:\\eclipse-dsl\\plugins\"))"
+      }
+    ],
+    "Experiments/RQ1/Scripts/Test/EcoreGenTL-TLBench-tests.py": [
+      {
+        "line_number": 86,
+        "risks": [
+          "AUTHOR_NAME_ZEQING",
+          "LOCAL_ONEDRIVE_PATH",
+          "HARDCODED_ABSOLUTE_PATH",
+          "INSTITUTION_USTB"
+        ],
+        "preview": "r\"C:\\Users\\Zeqing\\OneDrive\\2025-USTB\\iecoregen\\result-RQ2\\E-Workspace\","
+      },
+      {
+        "line_number": 89,
+        "risks": [
+          "AUTHOR_NAME_ZEQING",
+          "LOCAL_ONEDRIVE_PATH",
+          "HARDCODED_ABSOLUTE_PATH",
+          "INSTITUTION_USTB"
+        ],
+        "preview": "LIB_DIR = Path(r\"C:\\Users\\Zeqing\\OneDrive\\2025-USTB\\iecoregen\\lib\")"
+      },
+      {
+        "line_number": 94,
+        "risks": [
+          "HARDCODED_ABSOLUTE_PATH"
+        ],
+        "preview": "Path(r\"E:\\eclipse-dsl\\plugins\\org.eclipse.emf.ecore_2.41.0.v20251025-0946.jar\"),"
+      },
+      {
+        "line_number": 95,
+        "risks": [
+          "HARDCODED_ABSOLUTE_PATH"
+        ],
+        "preview": "Path(r\"E:\\eclipse-dsl\\plugins\\org.eclipse.emf.common_2.44.0.v20251025-0946.jar\"),"
+      },
+      {
+        "line_number": 96,
+        "risks": [
+          "HARDCODED_ABSOLUTE_PATH"
+        ],
+        "preview": "Path(r\"E:\\eclipse-dsl\\plugins\\org.eclipse.emf.ecore.xmi-2.39.0.jar\"),"
+      },
+      {
+        "line_number": 702,
+        "risks": [
+          "AUTHOR_NAME_ZEQING",
+          "LOCAL_ONEDRIVE_PATH",
+          "HARDCODED_ABSOLUTE_PATH",
+          "INSTITUTION_USTB"
+        ],
+        "preview": "report_dir = Path(r\"C:\\Users\\Zeqing\\OneDrive\\2025-USTB\\iecoregen\\Codebase_Python\\reports\")"
+      }
+    ]
+  }
+}
