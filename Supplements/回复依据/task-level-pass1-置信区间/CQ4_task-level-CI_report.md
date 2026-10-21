@@ -49,3 +49,9 @@ Per-task Pass@1 (%) in advisor-template order. JavaBench not in pass@k.csv; valu
 - SWE-Agent-Mini | minimax-m3 | JavaBench: 0, 0, 0, 0   (rows: RQ1 raw)
 - SWE-Agent-Mini | deepseek-v4-flash | TLBench: 0, 40, 0, 0, 100, 0, 100, 80, 0, 0   (rows: 202,206,210,214,218,222,226,230,234,238)
 - SWE-Agent-Mini | minimax-m3 | TLBench: 0, 20, 0, 0, 80, 0, 100, 80, 0, 0   (rows: 203,207,211,215,219,223,227,231,235,239)
+
+
+
+## 解释
+我们使用的是 无偏估计,
+脚本 用的是t分布

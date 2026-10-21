@@ -1,0 +1,391 @@
+ICSE 2027 Paper #955 Reviews and Comments
+===========================================================================
+Paper #955 EcoreGenTL: A Hybrid Approach Fusing MDE Template-Based and
+LLM-Driven Code Generation
+
+
+Review #955A
+===========================================================================
+
+Overall merit
+-------------
+3. Weak accept
+
+Novelty
+-------
+3. Substantial - presents a clearly new idea, method, result, artifact,
+   dataset, use case, workflow, or perspective
+
+Rigor
+-----
+2. Fair - some weaknesses, but the main claims are at least partially
+   supported
+
+Relevance
+---------
+3. High - addresses an important SE problem and is likely to influence
+   research or practice under clear assumptions
+
+Verifiability and Transparency
+------------------------------
+3. Good - Sufficient information is provided to understand the work and
+   support verification of the main claims
+
+Presentation
+------------
+4. Excellent - highly clear, well structured, and effective in
+   communicating the contribution
+
+Paper summary
+-------------
+This paper proposes EcoreGenTL, an MDE-based tool that exploits LLMs for code generation. In particular, the process is guided by requirements written in natural language and an Ecore input model converted into a PlantUML textual specification. Afterward, the generated specification is reviewed by the LLM to reduce any possible hallucinations and used to generate the code using the EMF template-based component. The code specification is eventually completed using the LLM-driven generation injected with EMF-specific rules.  To evaluate the approach, a tool implementation is provided and tested on two different benchmarks leveraging five prominent LLMs. In addition, an ablation study and an error case analysis are discussed.
+
+Strengths
+---------
++ Relevant topic
+
++ Evaluation is well-conducted
+
++ Replication package is provided
+
+Weaknesses
+----------
+-  A non-LLM baseline (e.g., EMF template) should be considered as a sanity check
+
+- Generalizability (in terms of framework and dataset size) might be an issue
+
+- Time and token consumption (for the closed-source models) can be reported 
+
+- Some experimental settings need to be justified
+
+Detailed comments for authors
+-----------------------------
+Overall merit: 
+
+The paper targets a relevant problem in the MDE community and proposes a structured and automated approach to augment MDE template-based generation with LLMs. While the evaluation and the methodology are rigorous, I have some concerns about the generalizability of the approach. The authors properly acknowledge this limitation, but the dataset size remains very low, and the approach can be adapted at least to another EMF-based engine, i.e., Acceleo. In this respect, the experimental settings systematically explore many relevant configurations, although a configuration that exploits only EMF template-based generation (without LLMs) can be further explored. On the positive side, ablation and error case analysis further explore the generation, highlighting the limits of the approach. The authors should also consider computing the required time to obtain the final code and the cost in terms of tokens for closed-source models. Overall, I support the acceptance of the paper given the relevant topic, the potential practical impact for the MDE community, and the rigor of the evaluation, although the mentioned limitation needs to be addressed to be considered for publication.
+
+
+
+
+
+Novelty
+
+The approach integrates and evaluates the integration of LLMs with MDE template-based code generation. The approach is well discussed and framed with the current state-of-the-art, highlighting the novel contribution. Although the generalizability might be an issue, the process looks structured and useful for practitioners. 
+
+Rigor
+
+The approach is well-explained and introduces different automated loops for reviewing the artifacts produced by the LLMs. Although it is only applied to Xtext-based template-based generation, EMF is a widely adopted framework in the MDE community. In this respect, the authors should discuss how difficult it would be to apply EcoreGenTL to another famous template-based code generator, i.e., Acceleo. Concerning the evaluation, the overall process systematically explores different configurations, and the evaluation of failure cases is very relevant from a practical point of view. However, the dataset size might limit the generalizability, although different domain applications are considered. In this respect, the authors should justify some of the experimental settings, i.e., reporting their expertise in the MDE field, and clarify why the temperature and the reasoning have been set. Currently, the rationale behind those choices is not fully justified. Concerning the metrics, all the quantitative metrics are relevant to the target of the paper, i.e., correctness and completeness, although the time required and the token consumption are, in my opinion, relevant dimensions to consider. Finally, the authors should introduce another baseline, i.e., by relying only on EMF template-based generation, as a sanity check. 
+
+
+Relevance
+
+Investigating the combined usage of MDE and LLMs is indeed a relevant topic. The proposed tool has practical usage for the MDE community since it combines deterministic checks with LLM-based code augmentations. The systematic evaluation, even on a small dataset, provides relevant insights for the community. 
+
+
+Verifiability 
+
+The implementation is provided as supplementary materials. The README contains minimal yet effective instructions to run the tool. Therefore, the results can be replicated. 
+
+
+Presentation
+
+The paper is overall well-written and structured. Figures and tables summarize the obtained results properly. Concerning the bibliography, the DOI should be inserted for each entry for the sake of verifiability.
+
+Questions for authors’ response
+-------------------------------
+Q1: Is it possible to apply the tool to another template-based engine, i.e., Acceleo?
+
+Q2: Is it possible to add a non-LLM baseline for a sanity check?
+
+Q3: Is it possible to add the rationale behind the experimental settings, e.g., dataset size, temperature, and reasoning configuration?
+
+Q4: Is it possible to report execution time and token consumption for the experimented LLMs?
+
+
+
+Review #955B
+===========================================================================
+
+Overall merit
+-------------
+3. Weak accept
+
+Novelty
+-------
+2. Incremental - modest extension, adaptation, combination, or improvement
+
+Rigor
+-----
+3. Good - appropriate methods and evidence adequately support the claims
+
+Relevance
+---------
+2. Moderate - relevant and useful, but the expected impact is limited or
+   narrowly scoped
+
+Verifiability and Transparency
+------------------------------
+2. Fair - Some information is provided, but not enough to support
+   independent scrutiny, verification, or replication where appropriate
+
+Presentation
+------------
+3. Good - clear, well organized, and easy to follow
+
+Paper summary
+-------------
+The paper proposes EcoreGentTL, a hybrid code-generation pipeline that integrates template-based techniques with LLM-driven completion to address the limitations of standalone approaches within EMF contexts. The methodology leverages Ecore models and natural-language requirements to derive operation-level specifications, subsequently generating a structurally correct Java skeleton. An LLM then populates the method bodies, ensuring the skeleton's integrity through compression, context retrieval, AST-based merging, and an iterative compile-fix loop. Evaluation against JavaBench and a private benchmark, using five LLMs, demonstrates significant improvements in both compilation and test success rates compared to vanilla and agent-based baselines.
+
+Strengths
+---------
+- Clear and practical idea 
+- The results suggest a practical approach to retrofitting existing MDE tools instead of replacing them
+- The empirical evaluation covers two benchmarks, five LLMs, four main baselines, and an ablation study that isolates the contribution of each major component of EcoreGenTL
+
+Weaknesses
+----------
+The requirement-to-model connection is not clear, and the paper shows that requirement decomposition remains a major source of errors 
+- The evaluation is limited in scale: the paper studies 14 problems in total, and one benchmark is private, so the external validity is promising but not fully convincing.
+
+Detailed comments for authors
+-----------------------------
+**Novelty.** 
+The paper presents a novel and interesting idea. While the MDE community has explored various applications of LLMs to support modelling tasks, this work distinguishes itself by leveraging language models to complement established template-based techniques. However, to enhance the contribution, the authors should be more explicit regarding the intended stakeholders and the specific software engineering phases that would benefit most from the proposed approach. 
+
+**Rigor.** 
+The evaluation is generally well designed, with multiple models, multiple baselines, and ablations. The main weakness is that the benchmark suite is modest, and the analysis of failure causes is not fully demonstrated. For instance, the paper’s own results show that requirement decomposition remains a major source of failure, which suggests that the specification layer is not solid enough.  For instance, it would be helpful if the authors discussed how sensitive the pipeline is to initial prompt variations. Additionally:
+-  page 4, “After collecting all revised specifications, EcoreGenTL will update the Ecore model to reflect the changes”: This sentence is confusing because the Ecore model is introduced as an input to the pipeline. Please clarify whether the model itself is modified, or whether only the stored operation-specification annotations are updated.
+- page 4, “correcting any omissions, misinterpretations, or reversed requirements”: The review step is useful, but it is not completely clear why it should fix the kind of decomposition error shown earlier. It is important to explain how the review step can recover missing preconditions or other omissions that were already lost in the first decomposition stage.
+- page 5, “while errors ≠ ∅ do”: The repair loop is plausible. Unfortunately, the paper is not reporting detailed metrics on convergence rates or retry limits, such as how many iterations are usually needed and whether the loop ever reaches the retry limit without resolving the errors. 
+- page 6, “with a fixed retry limit of 3”: It is not clear if this limit applies only to code fixing or also to earlier completion stages, and and whether the chosen limit is sufficient in practice. Without that, it is hard to judge the robustness of the iterative repair mechanism.
+-  page 6, “agentic and vanilla LLM baselines”: The evaluation compares against useful baselines, but Table III leaves some methodological details implicit, especially around how repair iterations are counted across methods. Please make the comparison protocol more explicit so readers can tell whether the baselines and EcoreGenTL are being given equivalent opportunities to recover from errors. 
+- page 9, “Table V presents the root cause attribution of each fault type”: The root-cause analysis is interesting, but the attribution is not clear. For instance, it is not convincing that requirement faults, completion faults, and EMF-knowledge faults can always be separated so sharply, because these causes may interact in the same failing case. 
+
+**Relevance.**  
+This is a highly relevant problem for software engineering; many MDE systems provide robust structural generation but rely on developers for semantic completion. Consequently, a method that enhances completeness without compromising the generated skeleton could have significant practical impact. As previously noted in the evaluation, I suggest the authors expand their discussion on the following points:
+- page 10, “Most of the errors can be attributed to incorrect requirement decomposition and insufficient EMF knowledge”: While this is an important finding, it highlights a primary weakness: requirement decomposition remains a significant bottleneck, even following the review step. I encourage the authors to acknowledge this limitation more explicitly and discuss the specific components of the pipeline that remain fragile.
+- page 10, “The evaluation is limited to 14 problems”: This limitation should be emphasized more strongly. The results are promising, but the current scale is still too small to support stronger claims about broader generalization and  practical relevance.
+
+**Verifiability and transparency.**  
+The pipeline is described in enough detail to understand the major steps, but some parts  need further clarification: how the requirement decomposition and review interact with the Ecore model, how the iterative repair loop behaves in practice, and how the root-cause attribution was operationalized. The paper also mentions a supplemental binary and showcase project. However, based on the available materials, it is not clear how to reproduce the evaluation or inspect the internal logic of the tool. Providing a clear instruction or script to run the benchmarks would significantly improve the artifact's usability (see comments below in the "Artifact assessment"  section).
+
+**Presentation.**  
+The paper is generally clear and well organized, with a readable structure and a good separation between the approach, implementation, evaluation, and error analysis. That said, some conceptual transitions would benefit from better explanations, especially around which parts of the pipeline are model-dependent and which are generic EMF/LLM aspects.
+
+Artifact assessment
+-------------------
+2. Partially Satisfactory, i.e., the artifacts partially contain what is
+   declared in the submission form or the paper.
+
+Comments on artifact assessment
+-------------------------------
+The paper states that the supplemental material includes the EcoreGenTL binary and a simple showcase project. However, the available package does not give clear instructions on how to reproduce the evaluation. A README file is made available, even though it describes the content of the package without providing any details on the way to reproduce the perfomed experiments or even to just execute the approach on an illustrative scenario.
+
+
+
+Review #955C
+===========================================================================
+
+Overall merit
+-------------
+2. Weak reject
+
+Novelty
+-------
+2. Incremental - modest extension, adaptation, combination, or improvement
+
+Rigor
+-----
+2. Fair - some weaknesses, but the main claims are at least partially
+   supported
+
+Relevance
+---------
+3. High - addresses an important SE problem and is likely to influence
+   research or practice under clear assumptions
+
+Verifiability and Transparency
+------------------------------
+3. Good - Sufficient information is provided to understand the work and
+   support verification of the main claims
+
+Presentation
+------------
+3. Good - clear, well organized, and easy to follow
+
+Paper summary
+-------------
+EcoreGenTL combines Ecore/EMF template generation with LLM-generated Java method bodies. It deterministically generates project structure and signatures, decomposes requirements, retrieves and compresses context, generates method bodies, confines merging through AST-based body replacement, and iterates on compiler feedback. Across four adapted JavaBench problems and ten private TLBench problems with five LLMs, the paper reports higher method-level pass rates than pure LLM generation.
+
+Strengths
+---------
+- The division of labor is sensible: deterministic generators handle structure and interfaces, while LLMs fill behavior.
+- Body-only AST merging and compiler repair reduce the chance of structural corruption.
+- Five models and repeated samples are evaluated rather than one curated backend.
+- Method-level improvements are large enough to suggest that scaffolding helps this task class.
+- The system workflow and examples are described clearly.
+
+Weaknesses
+----------
+- There are only 14 problems, ten from private TLBench, limiting statistical and external validity.
+- JavaBench is adapted into Ecore-friendly multi-class projects; both tests and scaffolds may favor the proposed approach.
+- Baselines receive natural language plus PlantUML, while EcoreGenTL has executable Ecore/template assets that encode signatures and require extra engineering.
+- The headline Pass% is method-level; exact project Pass@1 remains low, and methods are not independent samples.
+- Model calls, tokens, latency, repair iterations, and human Ecore/template authoring cost are missing.
+- Line coverage does not establish behavioral adequacy, and private tests cannot be inspected.
+
+Detailed comments for authors
+-----------------------------
+**Novelty.** Combining Ecore/EMF template generation for structure with LLM completion for behavior is sensible, and body-only AST merging plus context routing have engineering value. MDE plus generative AI is not itself new, so the paper should distinguish EcoreGenTL more precisely from model-to-text generation, skeleton-guided completion, and compiler-in-the-loop agents, with ablations isolating decomposition, context routing, AST merging, and repair.
+
+**Rigor.** The main comparison confounds the method with unequal input assets and budgets. Pure LLM baselines receive natural language and PlantUML, whereas EcoreGenTL has an Ecore model and templates that generate complete signatures. Give every baseline the same Ecore-derived skeleton, then isolate component gains and account for human model/template authoring and maintenance. Four adapted JavaBench and ten private TLBench problems are too few for broad claims.
+
+**Relevance.** In structured domains that already maintain Ecore/EMF assets, deterministic scaffolding plus LLM behavior completion could be useful and safer for interfaces. 
+
+**Verifiability & transparency.** Artifact is provided as supplementary material.
+
+**Presentation.** The paper is in general well structured and easy to follow.
+
+Questions for authors’ response
+-------------------------------
+1. If all baselines receive the complete skeleton derived from the same Ecore model, how much do EcoreGenTL's decomposition, context, and repair stages add?
+2. How much human time is required to create and maintain Ecore models and templates, and can the same information be exposed to baselines?
+3. Can the ten TLBench tasks or equivalent anonymous materials be released, and were JavaBench adaptations frozen before method development?
+4. What are calls, tokens, latency, cost, and repair rounds per condition, and what are task-level confidence intervals for project Pass@1?
+
+
+
+Rebuttal Response by Author [Xiao He <hexiao@ustb.edu.cn>] (1000 words)
+---------------------------------------------------------------------------
+We appreciate the constructive review comments.
+
+This paper investigates whether the two popular code generation paradigms---template-based and LLM-driven---can be effectively combined. We demonstrate feasibility via EcoreGenTL, integrating an EMF code generator with LLMs, and discuss key challenges: Ecore-aware context retrieval, code compression, AST-based merging, and MDE knowledge injection. To our knowledge, we are among the first to systematically study this in the context of AI for MDE. This work shows how traditional MDE and emerging LLM techniques complement each other, offering insights for future hybrid code generation.
+
+# **Common Concerns**
+
+## **CC1-Benchmark size**
+JavaBench is a high-quality project-level Java benchmark with four tasks (2,560-6,926 LOC; 13-29 classes, 32-53 methods each), ensuring complexity. Given scarce project-level Java benchmarks, we added TLBench with ten cross-domain tasks (see `Experiments/Benchmarks`). 
+
+For external validity, we also evaluated seven RealBench (FSE'26, doi:10.1145/3797106) tasks and a new agent baseline, OpenHands; results align with current trends and will be added in revision.
+
+## **CC2-Token&time cost**
+
+We measured token consumption on JavaBench with gemini-3.1-flash-lite (G) and deepseek-v4-flash (DS). EcoreGenTL uses 3.46M/G, 10.31M/DS, comparable to OpenCode (3.24M/G, 11.2M/DS); SWE-Agent-Mini (619K/G, 6.05M/DS), VL (165K/G, 281K/DS), and VL-Fix (171K/G, 359K/DS) use fewer tokens but perform worse. We will include full statistics in revision.
+
+Execution time cannot be fairly measured due to remote services and network conditions; token consumption serves as a proxy.
+
+# **Revision Plan**
+1. Enhance the introduction by clarifying the motivation and scope.
+2. Add further evaluation results and analyses.
+3. Clarify method/evaluation details.
+ 
+# **Response to Reviewer A**
+
+## **A1-Adaptability to Acceleo**
+
+Our approach generalizes to other MDE tools producing code from Ecore models, but EcoreGenTL must adapt to each framework's coding styles and constraints. For instance, Acceleo may not use `@generated` as EMF does, affecting components like the AST-based merger.
+
+## **A2-Pure EMF baseline**
+
+The standard EMF generator emits only static structure, no method bodies, so it cannot pass tests requiring method implementations. A sanity check on all JavaBench/TLBench tasks confirms: code compiles (Compilation@1=100%) but yields 0% Pass@1/3; test-level pass rates 15.58% (JavaBench), 0.37% (TLBench).
+
+## **A3-Experimental setting**
+
+1. Regarding dataset size, see CC1.
+2. We set temperature to 0.7, a widely adopted setting balancing diversity and stability in code generation (Ren et al., EMNLP'25, doi:10.18653/v1/2025.emnlp-main.419; Tian et al., ICSE'25, doi:10.1109/ICSE55347.2025.00108).
+3. Reasoning controls vary across LLMs in options and semantics (e.g., DeepSeek-V4-Flash: none/low/high/max; MiniMax-M3: disabled/enabled). To minimize variance, we standardized reasoning by disabling it where possible or using the lowest level.
+  
+## **A4-Time&token consumption**
+
+See CC2.
+
+# **Response to Reviewer B**
+
+## **B1-Stakeholders and phases**
+
+We introduce a hybrid paradigm unifying MDE template-based and LLM-driven code generation in a single pipeline. Unlike existing efforts focusing on LLM-assisted model generation, we target model-to-code transformation. 
+
+As a contribution to AI for MDE, this work aligns with the conference topic and is relevant to both MDE and SE communities.
+
+## **B2-Ecore model updates**
+
+EMF handles documentation through EAnnotations, serialized as docstrings in generated code. To reuse EMF's built-in docstring generation, EcoreGenTL appends EAnnotations to methods to store LLM-generated specifications, **without** modifying class diagrams (pages 3-4).
+
+## **B3-Recovering omissions**
+
+Algorithm 2 provides LLMs with the original NL requirement and first-pass specifications. Since the original requirement remains fully available, LLMs can recover omitted details. The prompt template is provided in the supplement (`EcoreGenTLShowcase/Prompt_Templates.md`).
+
+## **B4-Requirement decomposition**
+
+We agree that requirement analysis remains an open issue, as discussed in prior work (ICSE'25, doi:10.1109/ICSE55347.2025.00108; ICSE'26, doi:10.1145/3744916.3764572). Although limited, the review step partially mitigates this issue, as our ablation study confirms. We will discuss this in the revision.
+
+## **B5-Retry limits**
+
+Our algorithms have no retry limit, but our implementation sets it to 3, an empirical, adjustable value. Beyond code fixing, requirement decomposition and code completion also retry on incomplete LLM output. Logs show the stopping condition is usually met within 1-2 iterations, though some errors persist after 3.
+
+## **B6-Comparison protocol**
+
+We thank Reviewer-B for catching this. VL-Fix uses a retry limit of 3 (see supplement: `Experiments/RQ1/Scripts/CodeGen/VL-Fix-TLBench.py`, L400; `VL-Fix-JavaBench.py`, L483). The two agent baselines determine their own iteration counts. We will clarify the protocol in the revision.
+
+## **B7-Failure causes analysis**
+
+Attribution has two steps: locate the stage where the error first occurs, then identify its primary cause. A faulty specification faithfully implemented is attributed to requirement decomposition; a correct specification implemented incorrectly is attributed to code completion. Most failures thus have a single primary cause. Two authors independently attributed causes and disagreed on only 9 of 393 failures (2.29%), all resolved by discussion into a single cause. See supplement files `Experiments/RQ3/JavaBench_case_analysis.md` and `TLBench_case_analysis.md`.
+
+## **B8-Artifact**
+
+See `EcoreGenTLShowcase/README.md` in supplement to execute our showcase.
+
+# **Response to Reviewer C**
+
+## **C1-Value added over the skeleton**
+
+EcoreGenTL and baselines receive the same external inputs: a requirement and a class diagram. MDE code generation is internal to EcoreGenTL, not an external input; providing the skeleton to baselines would be unfair. 
+
+Even with the skeleton, baselines must still generate method bodies. The ablation in Section V-B shows that removing decomposition, context, or repair each substantially reduces Pass@1, confirming these components are essential beyond the skeleton.
+
+## **C2-Model/template cost and baseline exposure**
+
+Templates are part of the EMF generator and maintained by MDE engineers, so we incur no creation or maintenance effort for them. Class diagrams were created manually during evaluation, but this process can be automated (TraceDev [ISSTA'26, doi:10.1145/3832171]; CDGen [MODELS'26, doi:10.1145/3822455.3830323]; MetaGPT [ICLR'24, doi:10.48550/arXiv.2308.00352]). 
+
+All methods receive the same class-diagram information---only the format differs (Ecore vs. PlantUML). Therefore, the information content is identical.
+
+## **C3-Benchmark availability & adaptation freeze**
+
+The JavaBench adaptation is independent of EcoreGenTL and does not bias the benchmark in our favor. As explained on page 6, we only derived Ecore/PlantUML class diagrams from the original Java classes, aggregated the Javadocs into a holistic requirement, and adapted the tests to EMF APIs. 
+
+Full details of TLBench and the adapted JavaBench are provided in the supplement (`Experiments/Benchmarks`) for review.
+
+## **C4-Efficiency metrics & Pass@1 CIs**
+
+We calculated task-level Pass@1 under deepseek-v4-flash (DS) and minimax-m3 (MM). The task-level confidence intervals for DS+JavaBench/MM+JavaBench/DS+TLBench/MM+TLBench are:
+
+- EcoreGenTL: 0-45%/0-42%/28-88%/29-83%
+- OpenCode: 0-21%/0%/2-62%/0-65%
+- SWE-Agent-Mini: 0%/0%/0-64%/0-58%
+
+Full confidence intervals will be included in the revision. For token consumption, see CC2. For repair costs, see B5/B6.
+
+
+
+Review #955D
+===========================================================================
+
+Metareview
+----------
+Dear authors,
+
+After the rebuttal period followed by an internal discussion, the reviewers see a potentially valuable contribution. However, a major revision is requested to address unaddressed concerns, in particular:
+
+1. The key comparison remains biased, i.e., the baselines are not evaluated with the same skeleton.
+
+2. The added RealBench results are appreciated, but the results need to be reported
+
+3. The motivation and the scope need to be refined
+
+4. The requirement decomposition issue should be mentioned and discussed properly
+
+5. Report the failure cause anaylsis and provide inter-agreement indexes for the human-based evaluation.
+
+Recommendation
+--------------
+2. Major Revision
