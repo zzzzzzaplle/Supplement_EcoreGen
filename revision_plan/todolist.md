@@ -6,7 +6,7 @@
     2.补充完整的 Token 消耗统计数据
         "We measured token consumption on JavaBench with gemini-3.1-flash-lite (G) and deepseek-v4-flash (DS)... We will include full statistics in revision."
         补充方法与基线在 JavaBench 上的完整 token 开销统计表格及分析。
-         model(5) x method(6:llm,llm-fix,opencode,openhand,swe,ecoretl) x benchmark=9
+         model(5) x method(6:llm,llm-fix,opencode,openhand,swe,ecoretl) x benchmark=90条数据
     3.讨论需求分析/分解的开放性局限与 Review 机制
         "We agree that requirement analysis remains an open issue, as discussed in prior work (ICSE'25, doi:10.1109/ICSE55347.2025.00108; ICSE'26, doi:10.1145/3744916.3764572). Although limited, the review step partially mitigates this issue, as our ablation study confirms. We will discuss this in the revision."
         在正文中引用相关文献并讨论需求分解固有限制，说明 review 阶段的部分缓解机制。
